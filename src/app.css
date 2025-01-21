@@ -1,0 +1,53 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@layer base {
+	@font-face {
+		font-family: 'DIN Next W1G';
+		src: url('/fonts/dinnextw1g.otf') format('opentype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: 'DIN Next W1G';
+		src: url('/fonts/dinnextw1g_black.otf') format('opentype');
+		font-weight: 900;
+		font-style: normal;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: 'DIN Next W1G';
+		src: url('/fonts/dinnextw1g_bold.otf') format('opentype');
+		font-weight: 700;
+		font-style: normal;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: 'DIN Next W1G';
+		src: url('/fonts/dinnextw1g_medium.otf') format('opentype');
+		font-weight: 500;
+		font-style: normal;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: 'DIN Next W1G';
+		src: url('/fonts/dinnextw1g_light.otf') format('opentype');
+		font-weight: 300;
+		font-style: normal;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: 'DIN Next W1G';
+		src: url('/fonts/dinnextw1g_ultralight.otf') format('opentype');
+		font-weight: 200;
+		font-style: normal;
+		font-display: swap;
+	}
+}
