@@ -1,76 +1,65 @@
 <script lang="ts">
 	import { supabase } from '$lib/supabase/client';
 	import { marked } from 'marked';
+	import { saveDocument, getDocumentHistory, rollbackToVersion } from '$lib/stores/documents';
+	import type { DocumentVersion } from '$lib/types/documents';
+	import { onMount } from 'svelte';
 
 	let isEditing = false;
-	let markdownContent = `# Changelog
+	let showHistory = false;
+	let markdownContent = '';
+	let versions: DocumentVersion[] = [];
+	let loading = false;
 
-## Version 0.1.0 (Current)
+	onMount(async () => {
+		await loadCurrentVersion();
+		await loadHistory();
+	});
 
-### ✨ New Features
-- Match overlay system with real-time score updates
-- Team standings display with division breakdowns
-- Broadcast script editor with markdown support
-- Dark/Light mode toggle
-- Authentication system with Supabase
-- Responsive admin dashboard
-- OBS URL generation for overlays
+	async function loadCurrentVersion() {
+		const { data } = await supabase
+			.from('versions')
+			.select('content')
+			.eq('document_type', 'changelog')
+			.eq('is_current', true)
+			.single();
 
-### 🐛 Known Issues
-- [ ] Copy button not working for OBS URLs
-- [ ] Division standings click state not expanding properly
-- [ ] Series scores not updating consistently across sections
-- [ ] Overlay data needs to be converted to real-time updates
-
-### 🚧 In Progress
-- Real-time data synchronization
-- Team management system
-- Match history tracking
-
-### ✅ Completed
-- Basic authentication flow
-- Admin dashboard layout
-- Broadcast script editor
-- Dark/light mode implementation
-- Initial overlay system
-- Team standings display
-- Match overlay base functionality
-
-### 📋 Planned Features
-- Tournament bracket system
-- Player statistics tracking
-- Advanced overlay customization
-- Team profile pages
-- Match scheduling system
-- Automated social media updates
-
-## Development Notes
-
-### Priority Tasks
-1. Fix real-time data synchronization
-2. Implement proper error handling
-3. Add comprehensive logging
-4. Complete team management system
-
-### Recent Updates
-- Added dark/light mode toggle
-- Implemented broadcast script editor
-- Set up basic overlay system
-- Created team standings display
-- Implemented match overlay base functionality`;
-
-	function handleEdit() {
-		isEditing = true;
+		if (data) {
+			markdownContent = data.content;
+		}
 	}
 
-	function handleSave() {
-		isEditing = false;
-		// TODO: Save to database
+	async function loadHistory() {
+		versions = await getDocumentHistory('changelog');
 	}
 
-	function handleCancel() {
-		isEditing = false;
-		// Reset content to last saved version if needed
+	async function handleSave() {
+		loading = true;
+		try {
+			const result = await saveDocument('changelog', markdownContent);
+			if (result.success) {
+				isEditing = false;
+				await loadHistory();
+			} else {
+				alert('Failed to save changes');
+			}
+		} finally {
+			loading = false;
+		}
+	}
+
+	async function handleRollback(versionId: string) {
+		if (confirm('Are you sure you want to rollback to this version?')) {
+			loading = true;
+			try {
+				await rollbackToVersion('changelog', versionId);
+				await loadCurrentVersion();
+				await loadHistory();
+				showHistory = false;
+			} finally {
+				loading = false;
+			}
+		}
 	}
 </script>
 
@@ -84,19 +73,26 @@
 				{#if isEditing}
 					<button
 						on:click={handleSave}
-						class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500"
+						disabled={loading}
+						class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500 disabled:opacity-50"
 					>
-						Save
+						{loading ? 'Saving...' : 'Save'}
 					</button>
 					<button
-						on:click={handleCancel}
+						on:click={() => (isEditing = false)}
 						class="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-500"
 					>
 						Cancel
 					</button>
 				{:else}
 					<button
-						on:click={handleEdit}
+						on:click={() => (showHistory = !showHistory)}
+						class="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-500"
+					>
+						{showHistory ? 'Hide History' : 'Show History'}
+					</button>
+					<button
+						on:click={() => (isEditing = true)}
 						class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
 					>
 						Edit
@@ -104,6 +100,41 @@
 				{/if}
 			</div>
 		</div>
+
+		{#if showHistory}
+			<div class="mb-8 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+				<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Version History</h2>
+				<div class="space-y-2">
+					{#each versions as version}
+						<div class="flex items-center justify-between rounded-md bg-white p-3 dark:bg-gray-700">
+							<div class="flex flex-col gap-1">
+								<span class="text-sm text-gray-600 dark:text-gray-300">
+									Version {version.version_number} - {new Date(version.created_at).toLocaleString()}
+								</span>
+								<span class="text-xs text-gray-500 dark:text-gray-400">
+									Edited by {version.creator?.email ?? 'Unknown User'}
+								</span>
+								{#if version.is_current}
+									<span
+										class="mt-1 inline-flex w-fit rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200"
+									>
+										Current
+									</span>
+								{/if}
+							</div>
+							{#if !version.is_current}
+								<button
+									on:click={() => handleRollback(version.id)}
+									class="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
+								>
+									Rollback to this version
+								</button>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
 
 		{#if isEditing}
 			<div class="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
