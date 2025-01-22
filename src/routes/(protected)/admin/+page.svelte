@@ -122,10 +122,10 @@
 				</h3>
 				<div class="mt-4 space-y-4">
 					<a
-						href=""
+						href="/admin/planning/changelog"
 						class="block w-full rounded-md bg-gray-200 px-4 py-2 text-center text-sm font-medium text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
 					>
-						Trello Board
+						Changelog
 					</a>
 					<a
 						href="/admin/planning/broadcast-script"

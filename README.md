@@ -1,3 +1,26 @@
+# Serenyx Broadcast
+
+A modern broadcast management system for esports tournaments and events. Built with SvelteKit, Tailwind CSS, and Supabase.
+
+## Features
+
+- 🎮 Match Overlay Management
+- 📊 Team Standings Display
+- 📝 Broadcast Script Editor
+- 🌓 Dark/Light Mode Support
+- 🔒 Secure Authentication
+- 📱 Responsive Design
+
+## Tech Stack
+
+- **Frontend**: SvelteKit, Tailwind CSS
+- **Backend**: Supabase
+- **Authentication**: Supabase Auth
+- **Database**: PostgreSQL (via Supabase)
+- **Deployment**: Docker
+
+## Project Structure
+
 # sv
 
 Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
