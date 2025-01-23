@@ -1,152 +1,65 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabase/client';
-	import { marked } from 'marked';
-	import { saveDocument, getDocumentHistory, rollbackToVersion } from '$lib/stores/documents';
-	import type { DocumentVersion } from '$lib/types/documents';
-	import { onMount } from 'svelte';
-
-	let isEditing = false;
-	let showHistory = false;
-	let markdownContent = '';
-	let versions: DocumentVersion[] = [];
-	let loading = false;
-
-	onMount(async () => {
-		await loadCurrentVersion();
-		await loadHistory();
-	});
-
-	async function loadCurrentVersion() {
-		const { data } = await supabase
-			.from('versions')
-			.select('content')
-			.eq('document_type', 'changelog')
-			.eq('is_current', true)
-			.single();
-
-		if (data) {
-			markdownContent = data.content;
-		}
-	}
-
-	async function loadHistory() {
-		versions = await getDocumentHistory('changelog');
-	}
-
-	async function handleSave() {
-		loading = true;
-		try {
-			const result = await saveDocument('changelog', markdownContent);
-			if (result.success) {
-				isEditing = false;
-				await loadHistory();
-			} else {
-				alert('Failed to save changes');
-			}
-		} finally {
-			loading = false;
-		}
-	}
-
-	async function handleRollback(versionId: string) {
-		if (confirm('Are you sure you want to rollback to this version?')) {
-			loading = true;
-			try {
-				await rollbackToVersion('changelog', versionId);
-				await loadCurrentVersion();
-				await loadHistory();
-				showHistory = false;
-			} finally {
-				loading = false;
-			}
-		}
-	}
+  import { fade, fly } from 'svelte/transition';
+  import { ScrollArea } from '$lib/components/ui/shared';
+  import Button from '$lib/components/ui/Button.svelte';
+  import { toast } from 'svelte-sonner';
+  
+  export let data;
+  
+  function formatDate(date: string) {
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }
 </script>
 
-<div class="min-h-screen bg-white dark:bg-gray-900">
-	<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-		<div class="mb-8 flex items-center justify-between">
-			<h1 class="text-3xl font-bold uppercase tracking-widest text-gray-900 dark:text-white">
-				Development Changelog
-			</h1>
-			<div class="space-x-4">
-				{#if isEditing}
-					<button
-						on:click={handleSave}
-						disabled={loading}
-						class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500 disabled:opacity-50"
-					>
-						{loading ? 'Saving...' : 'Save'}
-					</button>
-					<button
-						on:click={() => (isEditing = false)}
-						class="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-500"
-					>
-						Cancel
-					</button>
-				{:else}
-					<button
-						on:click={() => (showHistory = !showHistory)}
-						class="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-500"
-					>
-						{showHistory ? 'Hide History' : 'Show History'}
-					</button>
-					<button
-						on:click={() => (isEditing = true)}
-						class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
-					>
-						Edit
-					</button>
-				{/if}
-			</div>
-		</div>
+<div class="space-y-8" in:fade>
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold tracking-tight">Changelog</h2>
+      <p class="text-muted-foreground">Track broadcast updates and changes</p>
+    </div>
+    
+    <Button href="/admin/planning/changelog/new">
+      Add Entry
+    </Button>
+  </div>
 
-		{#if showHistory}
-			<div class="mb-8 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-				<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Version History</h2>
-				<div class="space-y-2">
-					{#each versions as version}
-						<div class="flex items-center justify-between rounded-md bg-white p-3 dark:bg-gray-700">
-							<div class="flex flex-col gap-1">
-								<span class="text-sm text-gray-600 dark:text-gray-300">
-									Version {version.version_number} - {new Date(version.created_at).toLocaleString()}
-								</span>
-								<span class="text-xs text-gray-500 dark:text-gray-400">
-									Edited by {version.creator?.email ?? 'Unknown User'}
-								</span>
-								{#if version.is_current}
-									<span
-										class="mt-1 inline-flex w-fit rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200"
-									>
-										Current
-									</span>
-								{/if}
-							</div>
-							{#if !version.is_current}
-								<button
-									on:click={() => handleRollback(version.id)}
-									class="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
-								>
-									Rollback to this version
-								</button>
-							{/if}
-						</div>
-					{/each}
-				</div>
-			</div>
-		{/if}
-
-		{#if isEditing}
-			<div class="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-				<textarea
-					bind:value={markdownContent}
-					class="h-[800px] w-full resize-none rounded bg-white p-4 font-mono text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-				/>
-			</div>
-		{:else}
-			<div class="prose prose-lg max-w-none dark:prose-invert">
-				{@html marked(markdownContent)}
-			</div>
-		{/if}
-	</div>
+  <div class="rounded-lg border bg-card" in:fly={{ y: 20 }}>
+    <ScrollArea.Root className="h-[700px]">
+      <ScrollArea.Viewport class="p-6">
+        {#each data.entries as entry}
+          <div class="relative pl-8 pb-8 last:pb-0">
+            <div class="absolute left-0 top-0 bottom-0 w-px bg-border" />
+            <div class="absolute left-[-4px] top-2 w-2 h-2 rounded-full bg-primary" />
+            
+            <div class="space-y-2">
+              <div class="flex items-center gap-4">
+                <time class="text-sm text-muted-foreground">
+                  {formatDate(entry.date)}
+                </time>
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-primary/10 text-primary">
+                  {entry.type}
+                </span>
+              </div>
+              
+              <h3 class="font-medium">{entry.title}</h3>
+              <p class="text-muted-foreground">{entry.description}</p>
+              
+              {#if entry.updates?.length}
+                <ul class="space-y-2 text-sm list-disc list-inside">
+                  {#each entry.updates as update}
+                    <li>{update}</li>
+                  {/each}
+                </ul>
+              {/if}
+            </div>
+          </div>
+        {/each}
+      </ScrollArea.Viewport>
+      <ScrollArea.Scrollbar />
+    </ScrollArea.Root>
+  </div>
 </div>

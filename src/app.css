@@ -1,53 +1,63 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g.otf') format('opentype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
+	:root {
+		--background: 0 0% 100%;
+		--foreground: 240 10% 3.9%;
+		--card: 0 0% 98%;
+		--card-foreground: 240 10% 3.9%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 240 10% 3.9%;
+		--primary: 343 89% 50%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 343 10% 90%;
+		--secondary-foreground: 343 10% 30%;
+		--muted: 343 10% 96%;
+		--muted-foreground: 343 10% 45%;
+		--accent: 343 10% 96%;
+		--accent-foreground: 343 10% 30%;
+		--destructive: 0 84.2% 60.2%;
+		--destructive-foreground: 0 0% 100%;
+		--border: 343 10% 90%;
+		--input: 343 10% 90%;
+		--ring: 343 88.7% 48.6%;
+		--radius: 0.5rem;
 	}
-
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g_black.otf') format('opentype');
-		font-weight: 900;
-		font-style: normal;
-		font-display: swap;
+	.dark {
+		--background: 240 10% 4%;
+		--foreground: 0 0% 100%;
+		--card: 240 10% 4%;
+		--card-foreground: 0 0% 100%;
+		--popover: 240 10% 4%;
+		--popover-foreground: 0 0% 100%;
+		--primary: 343 88.7% 48.6%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 343 10% 15%;
+		--secondary-foreground: 0 0% 100%;
+		--muted: 343 10% 15%;
+		--muted-foreground: 343 10% 70%;
+		--accent: 343 10% 15%;
+		--accent-foreground: 0 0% 100%;
+		--destructive: 0 84.2% 60.2%;
+		--destructive-foreground: 0 0% 100%;
+		--border: 343 10% 15%;
+		--input: 343 10% 15%;
+		--ring: 343 88.7% 48.6%;
 	}
+}
 
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g_bold.otf') format('opentype');
-		font-weight: 700;
-		font-style: normal;
-		font-display: swap;
+@layer base {
+	* {
+		@apply border-border;
 	}
-
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g_medium.otf') format('opentype');
-		font-weight: 500;
-		font-style: normal;
-		font-display: swap;
-	}
-
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g_light.otf') format('opentype');
-		font-weight: 300;
-		font-style: normal;
-		font-display: swap;
-	}
-
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g_ultralight.otf') format('opentype');
-		font-weight: 200;
-		font-style: normal;
-		font-display: swap;
+	body {
+		@apply bg-background text-foreground antialiased;
+		background-image: radial-gradient(
+			circle at center,
+			rgba(234, 14, 75, 0.15) 0%,
+			transparent 80%
+		);
 	}
 }

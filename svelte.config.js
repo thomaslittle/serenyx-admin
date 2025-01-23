@@ -13,7 +13,10 @@ const config = {
 
 	kit: {
 		// Using adapter-node instead of adapter-auto
-		adapter: adapter()
+		adapter: adapter(),
+		alias: {
+			'@/*': './src/lib/*'
+		}
 	},
 
 	extensions: ['.svelte', '.md', '.svx']

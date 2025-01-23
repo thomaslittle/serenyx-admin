@@ -16,9 +16,9 @@
 	}
 </script>
 
-<div class="min-h-screen bg-white dark:bg-gray-900">
+<div class="min-h-screen">
 	<!-- Navigation -->
-	<nav class="border-b border-gray-800 bg-gray-900">
+	<nav class="border-b border-zinc-800 bg-zinc-900/50">
 		<div class="mx-auto max-w-7xl">
 			<div class="flex h-16 items-center justify-between">
 				<div class="flex items-center">
@@ -67,7 +67,7 @@
 	<main class="mx-auto max-w-7xl p-4">
 		<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 			<!-- Quick Actions -->
-			<div class="rounded-lg bg-gray-100 p-6 dark:bg-gray-800">
+			<div class="bg-primary rounded-lg p-6">
 				<h3
 					class="border-l-2 border-red-500 pl-4 text-xl font-normal uppercase tracking-widest text-gray-900 dark:text-white"
 				>

@@ -1,227 +1,184 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { supabase } from '$lib/supabase/client';
-	import type { Database } from '$lib/supabase/types';
-	import ImageUpload from '$lib/components/ImageUpload.svelte';
+	import { fade, fly } from 'svelte/transition';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { Input, Select, ScrollArea } from '$lib/components/ui/shared';
+	import { toast } from 'svelte-sonner';
 
-	type Team = Database['public']['Tables']['teams']['Row'];
+	export let data;
 
-	let team: Team | null = null;
-	let error: string | null = null;
-	let loading = true;
+	let editing = false;
 	let saving = false;
+	let name = data.team.name;
+	let logo = data.team.logo;
+	let players = [...data.team.players];
 
-	onMount(async () => {
-		await fetchTeam();
-	});
-
-	async function fetchTeam() {
-		try {
-			loading = true;
-			const { data, error: fetchError } = await supabase
-				.from('teams')
-				.select('*')
-				.eq('id', $page.params.id)
-				.single();
-
-			if (fetchError) throw fetchError;
-			team = data;
-		} catch (e) {
-			error = e.message;
-		} finally {
-			loading = false;
-		}
-	}
-
-	async function updateTeam() {
-		if (!team) return;
-
+	async function saveTeam() {
 		try {
 			saving = true;
-			const { error: updateError } = await supabase
-				.from('teams')
-				.update({
-					name: team.name,
-					division: team.division,
-					logo_url: team.logo_url,
-					wins: team.wins,
-					losses: team.losses,
-					points: team.points
-				})
-				.eq('id', team.id);
+			const response = await fetch(`/api/teams/${data.team.id}`, {
+				method: 'PUT',
+				body: JSON.stringify({ name, logo, players })
+			});
 
-			if (updateError) throw updateError;
-			goto('/admin/teams');
-		} catch (e) {
-			error = e.message;
+			if (!response.ok) throw new Error('Failed to save team');
+			toast.success('Team saved successfully');
+			editing = false;
+		} catch (error) {
+			toast.error('Failed to save team');
 		} finally {
 			saving = false;
 		}
-	}
-
-	async function deleteTeam() {
-		if (!team || !confirm('Are you sure you want to delete this team?')) return;
-
-		try {
-			saving = true;
-			// If there's a logo, delete it first
-			if (team.logo_url) {
-				const url = new URL(team.logo_url);
-				const pathMatch = url.pathname.match(/logos\/(.+)/);
-				if (pathMatch) {
-					const filePath = pathMatch[1];
-					await supabase.storage.from('logos').remove([filePath]);
-				}
-			}
-
-			const { error: deleteError } = await supabase.from('teams').delete().eq('id', team.id);
-
-			if (deleteError) throw deleteError;
-			goto('/admin/teams');
-		} catch (e) {
-			error = e.message;
-		} finally {
-			saving = false;
-		}
-	}
-
-	function handleImageUpload(event: CustomEvent<{ url: string }>) {
-		if (team) {
-			team.logo_url = event.detail.url;
-		}
-	}
-
-	function handleImageError(event: CustomEvent<{ message: string }>) {
-		error = event.detail.message;
 	}
 </script>
 
-<div class="min-h-screen bg-gray-900 p-8">
-	<div class="mx-auto max-w-3xl">
-		<div class="md:flex md:items-center md:justify-between">
-			<div class="min-w-0 flex-1">
-				<h2 class="text-2xl font-bold text-white sm:text-3xl">
-					{#if loading}
-						Loading...
-					{:else if team}
-						Edit Team: {team.name}
+<div class="space-y-8" in:fade>
+	<div class="flex items-center justify-between">
+		<div>
+			<h2 class="text-3xl font-bold tracking-tight">{data.team.name}</h2>
+			<p class="text-muted-foreground">Manage team details and roster</p>
+		</div>
+
+		<div class="flex items-center gap-2">
+			{#if editing}
+				<Button variant="outline" on:click={() => (editing = false)}>Cancel</Button>
+				<Button on:click={saveTeam} disabled={saving}>
+					{saving ? 'Saving...' : 'Save Changes'}
+				</Button>
+			{:else}
+				<Button variant="outline" href="/admin/overlays/teams/{data.team.id}">View Overlay</Button>
+				<Button on:click={() => (editing = true)}>Edit Team</Button>
+			{/if}
+		</div>
+	</div>
+
+	<div class="grid grid-cols-3 gap-8" in:fly={{ y: 20 }}>
+		<div class="col-span-2 space-y-6">
+			<div class="bg-card rounded-lg border">
+				<div class="border-b p-4">
+					<h3 class="font-medium">Team Details</h3>
+				</div>
+				<div class="space-y-4 p-4">
+					{#if editing}
+						<div class="space-y-2">
+							<label class="text-sm font-medium">Team Name</label>
+							<Input bind:value={name} />
+						</div>
+						<div class="space-y-2">
+							<label class="text-sm font-medium">Logo URL</label>
+							<Input bind:value={logo} />
+						</div>
 					{:else}
-						Team Not Found
+						<div class="flex items-center gap-4">
+							<img src={data.team.logo} alt="" class="h-24 w-24 rounded-lg" />
+							<div>
+								<h4 class="font-medium">{data.team.name}</h4>
+								<p class="text-muted-foreground mt-1 text-sm">
+									{data.team.players.length} Players
+								</p>
+							</div>
+						</div>
 					{/if}
-				</h2>
+				</div>
 			</div>
-			<div class="mt-4 flex space-x-3 md:ml-4 md:mt-0">
-				<a
-					href="/admin/teams"
-					class="inline-flex items-center rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-500"
-				>
-					Cancel
-				</a>
-				{#if team}
-					<button
-						type="button"
-						on:click={deleteTeam}
-						disabled={saving}
-						class="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-50"
-					>
-						Delete Team
-					</button>
-				{/if}
+
+			<div class="bg-card rounded-lg border">
+				<div class="flex items-center justify-between border-b p-4">
+					<h3 class="font-medium">Team Roster</h3>
+					{#if editing}
+						<Button
+							size="sm"
+							variant="outline"
+							on:click={() =>
+								(players = [...players, { id: crypto.randomUUID(), name: '', role: '' }])}
+						>
+							Add Player
+						</Button>
+					{/if}
+				</div>
+				<ScrollArea.Root className="h-[400px]">
+					<ScrollArea.Viewport class="space-y-4 p-4">
+						{#each players as player, i (player.id)}
+							<div class="bg-muted flex items-center gap-4 rounded-lg p-4" in:fly|local={{ y: 10 }}>
+								{#if editing}
+									<div class="grid flex-1 grid-cols-2 gap-4">
+										<Input bind:value={players[i].name} placeholder="Player Name" />
+										<Select.Root
+											bind:value={players[i].role}
+											items={[
+												{ value: 'coach', label: 'Coach' },
+												{ value: 'captain', label: 'Captain' },
+												{ value: 'player', label: 'Player' },
+												{ value: 'substitute', label: 'Substitute' }
+											]}
+										/>
+									</div>
+									<Button
+										variant="ghost"
+										size="icon"
+										on:click={() => (players = players.filter((_, idx) => idx !== i))}
+									>
+										×
+									</Button>
+								{:else}
+									<img src={player.avatar} alt="" class="h-10 w-10 rounded-full" />
+									<div class="flex-1">
+										<p class="font-medium">{player.name}</p>
+										<p class="text-muted-foreground text-sm capitalize">{player.role}</p>
+									</div>
+								{/if}
+							</div>
+						{/each}
+					</ScrollArea.Viewport>
+					<ScrollArea.Scrollbar />
+				</ScrollArea.Root>
 			</div>
 		</div>
 
-		{#if error}
-			<div class="mt-4 rounded-md bg-red-500 p-4">
-				<p class="text-sm text-white">{error}</p>
+		<div class="space-y-6">
+			<div class="bg-card rounded-lg border">
+				<div class="border-b p-4">
+					<h3 class="font-medium">Recent Matches</h3>
+				</div>
+				<div class="space-y-4 p-4">
+					{#each data.recentMatches || [] as match}
+						<div class="bg-muted space-y-2 rounded-lg p-4">
+							<div class="flex items-center justify-between">
+								<time class="text-muted-foreground text-sm">
+									{new Date(match.date).toLocaleDateString()}
+								</time>
+								<span class="text-sm font-medium">
+									{match.result === 'win' ? 'Won' : 'Lost'}
+								</span>
+							</div>
+							<div class="flex items-center justify-between">
+								<div class="flex items-center gap-2">
+									<img src={match.opponent.logo} alt="" class="h-6 w-6 rounded-full" />
+									<span class="text-sm">{match.opponent.name}</span>
+								</div>
+								<span class="font-medium">{match.score}</span>
+							</div>
+						</div>
+					{/each}
+				</div>
 			</div>
-		{/if}
 
-		{#if loading}
-			<div class="mt-8 text-white">Loading team information...</div>
-		{:else if team}
-			<form on:submit|preventDefault={updateTeam} class="mt-8 space-y-6">
-				<div>
-					<label for="name" class="block text-sm font-medium text-white">Team Name</label>
-					<input
-						type="text"
-						id="name"
-						bind:value={team.name}
-						required
-						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-					/>
+			<div class="bg-card rounded-lg border">
+				<div class="border-b p-4">
+					<h3 class="font-medium">Statistics</h3>
 				</div>
-
-				<div>
-					<label for="division" class="block text-sm font-medium text-white">Division</label>
-					<input
-						type="text"
-						id="division"
-						bind:value={team.division}
-						required
-						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-					/>
-				</div>
-
-				<div>
-					<label class="mb-4 block text-sm font-medium text-white">Team Logo</label>
-					<div class="mt-1">
-						<ImageUpload
-							currentImageUrl={team.logo_url}
-							on:upload={handleImageUpload}
-							on:error={handleImageError}
-						/>
+				<div class="p-4">
+					<div class="grid grid-cols-2 gap-4">
+						<div class="bg-muted rounded-lg p-4 text-center">
+							<p class="text-2xl font-bold">{data.stats.winRate}%</p>
+							<p class="text-muted-foreground text-sm">Win Rate</p>
+						</div>
+						<div class="bg-muted rounded-lg p-4 text-center">
+							<p class="text-2xl font-bold">{data.stats.matchesPlayed}</p>
+							<p class="text-muted-foreground text-sm">Matches Played</p>
+						</div>
 					</div>
 				</div>
-
-				<div class="grid grid-cols-3 gap-4">
-					<div>
-						<label for="wins" class="block text-sm font-medium text-white">Wins</label>
-						<input
-							type="number"
-							id="wins"
-							bind:value={team.wins}
-							min="0"
-							class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-						/>
-					</div>
-
-					<div>
-						<label for="losses" class="block text-sm font-medium text-white">Losses</label>
-						<input
-							type="number"
-							id="losses"
-							bind:value={team.losses}
-							min="0"
-							class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-						/>
-					</div>
-
-					<div>
-						<label for="points" class="block text-sm font-medium text-white">Points</label>
-						<input
-							type="number"
-							id="points"
-							bind:value={team.points}
-							min="0"
-							class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-						/>
-					</div>
-				</div>
-
-				<div>
-					<button
-						type="submit"
-						disabled={saving}
-						class="w-full rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50"
-					>
-						{saving ? 'Saving...' : 'Save Changes'}
-					</button>
-				</div>
-			</form>
-		{:else}
-			<div class="mt-8 text-white">Team not found.</div>
-		{/if}
+			</div>
+		</div>
 	</div>
 </div>

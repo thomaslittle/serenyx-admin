@@ -1,173 +1,120 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { divisions } from '$lib/stores/tournament';
-	import { fetchDivisionStandings } from '$lib/stores/tournament';
-
-	let overlayUrl = '';
-	let selectedComponent = 'ticker';
-	let tickerInterval = 5;
-	let autoExpandInterval = 0;
-	let selectedDivisions: string[] = [];
-
-	onMount(async () => {
-		await fetchDivisionStandings();
-		// Set initial selected divisions
-		selectedDivisions = $divisions.map((d) => d.name);
-	});
-
-	function generateOverlayUrl() {
-		const baseUrl = window.location.origin;
-		const params = new URLSearchParams();
-
-		params.set('component', selectedComponent);
-
-		if (selectedComponent === 'ticker') {
-			params.set('interval', tickerInterval.toString());
-		} else if (selectedComponent === 'standings') {
-			params.set('divisions', selectedDivisions.join(','));
-			params.set('autoExpand', autoExpandInterval.toString());
-		}
-
-		overlayUrl = `${baseUrl}/overlays/tournament?${params.toString()}`;
-	}
-
-	function toggleDivision(divisionName: string) {
-		if (selectedDivisions.includes(divisionName)) {
-			selectedDivisions = selectedDivisions.filter((d) => d !== divisionName);
-		} else {
-			selectedDivisions = [...selectedDivisions, divisionName];
-		}
-	}
+  import { fade, fly } from 'svelte/transition';
+  import { Tabs } from '$lib/components/ui/shared';
+  import Button from '$lib/components/ui/Button.svelte';
+  import { toast } from 'svelte-sonner';
+  
+  export let data;
+  let selectedOverlay = 'bracket';
+  
+  const overlayTypes = [
+    { id: 'bracket', name: 'Tournament Bracket' },
+    { id: 'standings', name: 'Standings' },
+    { id: 'schedule', name: 'Schedule' }
+  ];
+  
+  function copyOverlayURL(type: string) {
+    const url = `${window.location.origin}/overlays/tournament/${type}`;
+    navigator.clipboard.writeText(url);
+    toast.success('Overlay URL copied');
+  }
 </script>
 
-<div class="min-h-screen bg-gray-900 p-8">
-	<div class="mx-auto max-w-7xl">
-		<h2 class="mb-8 text-2xl font-bold text-white">Tournament Overlay Controls</h2>
+<div class="space-y-8" in:fade>
+  <div>
+    <h2 class="text-3xl font-bold tracking-tight">Tournament Overlay</h2>
+    <p class="text-muted-foreground">Configure tournament bracket and standings overlays</p>
+  </div>
 
-		<!-- Overlay Selection -->
-		<div class="mb-8 rounded-lg bg-gray-800 p-6">
-			<h3 class="mb-4 text-lg font-medium text-white">Select Component</h3>
-
-			<div class="space-y-4">
-				<div class="flex items-center space-x-4">
-					<input
-						type="radio"
-						id="ticker"
-						bind:group={selectedComponent}
-						value="ticker"
-						class="h-4 w-4 border-gray-600 bg-gray-700 text-red-600 focus:ring-red-600"
-					/>
-					<label for="ticker" class="text-white">Match Schedule Ticker</label>
-				</div>
-
-				<div class="flex items-center space-x-4">
-					<input
-						type="radio"
-						id="standings"
-						bind:group={selectedComponent}
-						value="standings"
-						class="h-4 w-4 border-gray-600 bg-gray-700 text-red-600 focus:ring-red-600"
-					/>
-					<label for="standings" class="text-white">Division Standings</label>
-				</div>
-			</div>
-
-			<button
-				on:click={generateOverlayUrl}
-				class="mt-6 rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-500"
-			>
-				Generate Overlay URL
-			</button>
-		</div>
-
-		<!-- Component Settings -->
-		<div class="mt-8 space-y-8">
-			{#if selectedComponent === 'ticker'}
-				<div class="rounded-lg bg-gray-800 p-6">
-					<h3 class="mb-4 text-lg font-medium text-white">Ticker Settings</h3>
-					<div class="space-y-4">
-						<div>
-							<label class="mb-2 block text-sm font-medium text-white">
-								Update Interval (seconds)
-							</label>
-							<input
-								type="number"
-								min="1"
-								max="60"
-								bind:value={tickerInterval}
-								class="w-32 rounded-md border-0 bg-gray-700 px-4 py-2 text-white ring-1 ring-inset ring-gray-600"
-							/>
-						</div>
-					</div>
-				</div>
-			{:else if selectedComponent === 'standings'}
-				<div class="rounded-lg bg-gray-800 p-6">
-					<h3 class="mb-4 text-lg font-medium text-white">Standings Settings</h3>
-					<div class="space-y-4">
-						<div>
-							<label class="mb-2 block text-sm font-medium text-white"> Divisions to Show </label>
-							<div class="space-y-2">
-								{#each $divisions as division}
-									<label class="flex items-center space-x-2">
-										<input
-											type="checkbox"
-											checked={selectedDivisions.includes(division.name)}
-											on:change={() => toggleDivision(division.name)}
-											class="rounded border-gray-600 bg-gray-700 text-red-600 focus:ring-red-600"
-										/>
-										<span class="text-white">{division.name}</span>
-									</label>
-								{/each}
-							</div>
-						</div>
-						<div>
-							<label class="mb-2 block text-sm font-medium text-white">
-								Auto-expand Interval (seconds)
-							</label>
-							<input
-								type="number"
-								min="0"
-								max="60"
-								bind:value={autoExpandInterval}
-								class="w-32 rounded-md border-0 bg-gray-700 px-4 py-2 text-white ring-1 ring-inset ring-gray-600"
-							/>
-							<p class="mt-1 text-sm text-gray-400">Set to 0 to disable auto-expansion</p>
-						</div>
-					</div>
-				</div>
-			{/if}
-		</div>
-
-		{#if overlayUrl}
-			<!-- Overlay URL -->
-			<div class="mb-8 rounded-lg bg-gray-800 p-6">
-				<h3 class="mb-4 text-lg font-medium text-white">Overlay URL</h3>
-				<div class="flex items-center space-x-4">
-					<input
-						type="text"
-						readonly
-						value={overlayUrl}
-						class="flex-1 rounded-md border-0 bg-gray-700 px-4 py-2 text-white ring-1 ring-inset ring-gray-600"
-					/>
-					<button
-						on:click={() => navigator.clipboard.writeText(overlayUrl)}
-						class="rounded-md bg-gray-700 px-4 py-2 text-white transition-colors hover:bg-gray-600"
-					>
-						Copy
-					</button>
-				</div>
-				<p class="mt-2 text-sm text-gray-400">Use this URL as a Browser Source in OBS</p>
-			</div>
-
-			<!-- Preview -->
-			<div class="rounded-lg bg-gray-800 p-6">
-				<h3 class="mb-4 text-lg font-medium text-white">Preview</h3>
-				<div class="relative aspect-video w-full overflow-hidden rounded-lg bg-gray-900">
-					<iframe title="Overlay Preview" src={overlayUrl} class="h-full w-full border-0"></iframe>
-				</div>
-				<p class="mt-2 text-sm text-gray-400">This is how the overlay will appear in OBS</p>
-			</div>
-		{/if}
-	</div>
+  <Tabs.Root bind:value={selectedOverlay}>
+    <Tabs.List class="w-full border-b">
+      {#each overlayTypes as type}
+        <Tabs.Trigger value={type.id}>{type.name}</Tabs.Trigger>
+      {/each}
+    </Tabs.List>
+    
+    <div class="mt-6 space-y-6">
+      <Tabs.Content value="bracket">
+        <div class="grid grid-cols-2 gap-8" in:fly|local={{ y: 20 }}>
+          <div class="rounded-lg border bg-card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-medium">Double Elimination Bracket</h3>
+              <Button size="sm" on:click={() => copyOverlayURL('bracket')}>
+                Copy URL
+              </Button>
+            </div>
+            
+            <div class="aspect-video bg-muted rounded-lg flex items-center justify-center">
+              Preview
+            </div>
+          </div>
+        </div>
+      </Tabs.Content>
+      
+      <Tabs.Content value="standings">
+        <div class="rounded-lg border bg-card p-6" in:fly|local={{ y: 20 }}>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-medium">Tournament Standings</h3>
+            <Button size="sm" on:click={() => copyOverlayURL('standings')}>
+              Copy URL
+            </Button>
+          </div>
+          
+          <div class="space-y-4">
+            {#each data.standings || [] as team, i}
+              <div class="flex items-center gap-4 p-4 bg-muted rounded-lg">
+                <span class="text-xl font-bold w-8">{i + 1}</span>
+                <img src={team.logo} alt="" class="w-10 h-10 rounded-full" />
+                <div>
+                  <p class="font-medium">{team.name}</p>
+                  <p class="text-sm text-muted-foreground">{team.wins}W - {team.losses}L</p>
+                </div>
+              </div>
+            {/each}
+          </div>
+        </div>
+      </Tabs.Content>
+      
+      <Tabs.Content value="schedule">
+        <div class="rounded-lg border bg-card p-6" in:fly|local={{ y: 20 }}>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-medium">Tournament Schedule</h3>
+            <Button size="sm" on:click={() => copyOverlayURL('schedule')}>
+              Copy URL
+            </Button>
+          </div>
+          
+          <div class="space-y-4">
+            {#each data.schedule || [] as day}
+              <div class="space-y-2">
+                <h4 class="font-medium text-sm text-muted-foreground">
+                  {new Date(day.date).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </h4>
+                
+                {#each day.matches as match}
+                  <div class="flex items-center justify-between p-4 bg-muted rounded-lg">
+                    <div class="flex items-center gap-4">
+                      <img src={match.team1.logo} alt="" class="w-8 h-8 rounded-full" />
+                      <span class="text-sm">vs</span>
+                      <img src={match.team2.logo} alt="" class="w-8 h-8 rounded-full" />
+                    </div>
+                    <time class="text-sm text-muted-foreground">
+                      {new Date(match.time).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit'
+                      })}
+                    </time>
+                  </div>
+                {/each}
+              </div>
+            {/each}
+          </div>
+        </div>
+      </Tabs.Content>
+    </div>
+  </Tabs.Root>
 </div>

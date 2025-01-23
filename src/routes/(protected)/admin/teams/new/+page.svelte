@@ -1,151 +1,91 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
+	import Button from '$lib/components/ui/Button.svelte';
+	import Input from '$lib/components/ui/Input.svelte';
 	import { goto } from '$app/navigation';
-	import { supabase } from '$lib/supabase/client';
-	import type { Database } from '$lib/supabase/types';
-	import ImageUpload from '$lib/components/ImageUpload.svelte';
+	import { toast } from 'svelte-sonner';
 
-	type Team = Database['public']['Tables']['teams']['Row'];
-
-	let team: Partial<Team> = {
+	let form = {
 		name: '',
-		division: '',
-		wins: 0,
-		losses: 0,
-		points: 0,
-		logo_url: ''
+		logo: '',
+		players: [{ name: '', role: 'player' }]
 	};
-	let error: string | null = null;
-	let loading = false;
 
-	async function createTeam() {
+	async function handleSubmit() {
 		try {
-			loading = true;
-			const { data, error: createError } = await supabase
-				.from('teams')
-				.insert([team])
-				.select()
-				.single();
+			const response = await fetch('/api/teams', {
+				method: 'POST',
+				body: JSON.stringify(form)
+			});
 
-			if (createError) throw createError;
+			if (!response.ok) throw new Error('Failed to create team');
+			toast.success('Team created');
 			goto('/admin/teams');
-		} catch (e) {
-			error = e.message;
-		} finally {
-			loading = false;
+		} catch (error) {
+			toast.error('Failed to create team');
 		}
-	}
-
-	function handleImageUpload(event: CustomEvent<{ url: string }>) {
-		team.logo_url = event.detail.url;
-	}
-
-	function handleImageError(event: CustomEvent<{ message: string }>) {
-		error = event.detail.message;
 	}
 </script>
 
-<div class="min-h-screen bg-gray-900 p-8">
-	<div class="mx-auto max-w-3xl">
-		<div class="md:flex md:items-center md:justify-between">
-			<div class="min-w-0 flex-1">
-				<h2 class="text-2xl font-bold uppercase tracking-widest text-white sm:text-3xl">
-					New Team
-				</h2>
-			</div>
-			<div class="mt-4 flex md:ml-4 md:mt-0">
-				<a
-					href="/admin/teams"
-					class="inline-flex items-center rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-500"
+<div class="space-y-8" in:fade>
+	<div>
+		<h2 class="text-3xl font-bold tracking-tight">New Team</h2>
+		<p class="text-muted-foreground">Add a new team to the tournament</p>
+	</div>
+
+	<form class="space-y-6" on:submit|preventDefault={handleSubmit}>
+		<div class="space-y-4">
+			<label class="text-sm font-medium">Team Name</label>
+			<Input bind:value={form.name} required />
+
+			<label class="text-sm font-medium">Logo URL</label>
+			<Input bind:value={form.logo} type="url" />
+		</div>
+
+		<div class="space-y-4">
+			<div class="flex items-center justify-between">
+				<label class="text-sm font-medium">Players</label>
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					on:click={() => (form.players = [...form.players, { name: '', role: 'player' }])}
 				>
-					Cancel
-				</a>
+					Add Player
+				</Button>
+			</div>
+
+			<div class="space-y-4">
+				{#each form.players as player, i}
+					<div class="flex gap-4">
+						<Input bind:value={form.players[i].name} placeholder="Player name" />
+						<select
+							bind:value={form.players[i].role}
+							class="bg-background h-10 w-40 rounded-md border px-3"
+						>
+							<option value="coach">Coach</option>
+							<option value="captain">Captain</option>
+							<option value="player">Player</option>
+							<option value="substitute">Substitute</option>
+						</select>
+						{#if i > 0}
+							<Button
+								type="button"
+								variant="ghost"
+								size="icon"
+								on:click={() => (form.players = form.players.filter((_, idx) => idx !== i))}
+							>
+								×
+							</Button>
+						{/if}
+					</div>
+				{/each}
 			</div>
 		</div>
 
-		{#if error}
-			<div class="mt-4 rounded-md bg-red-500 p-4">
-				<p class="text-sm text-white">{error}</p>
-			</div>
-		{/if}
-
-		<form on:submit|preventDefault={createTeam} class="mt-8 space-y-6">
-			<div>
-				<label for="name" class="block text-sm font-medium text-white">Team Name</label>
-				<input
-					type="text"
-					id="name"
-					bind:value={team.name}
-					required
-					class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-				/>
-			</div>
-
-			<div>
-				<label for="division" class="block text-sm font-medium text-white">Division</label>
-				<input
-					type="text"
-					id="division"
-					bind:value={team.division}
-					required
-					class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-				/>
-			</div>
-
-			<div>
-				<label class="mb-4 block text-sm font-medium text-white">Team Logo</label>
-				<div class="mt-1">
-					<ImageUpload
-						currentImageUrl={team.logo_url}
-						on:upload={handleImageUpload}
-						on:error={handleImageError}
-					/>
-				</div>
-			</div>
-
-			<div class="grid grid-cols-3 gap-4">
-				<div>
-					<label for="wins" class="block text-sm font-medium text-white">Wins</label>
-					<input
-						type="number"
-						id="wins"
-						bind:value={team.wins}
-						min="0"
-						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-					/>
-				</div>
-
-				<div>
-					<label for="losses" class="block text-sm font-medium text-white">Losses</label>
-					<input
-						type="number"
-						id="losses"
-						bind:value={team.losses}
-						min="0"
-						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-					/>
-				</div>
-
-				<div>
-					<label for="points" class="block text-sm font-medium text-white">Points</label>
-					<input
-						type="number"
-						id="points"
-						bind:value={team.points}
-						min="0"
-						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-					/>
-				</div>
-			</div>
-
-			<div>
-				<button
-					type="submit"
-					disabled={loading}
-					class="w-full rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50"
-				>
-					{loading ? 'Creating...' : 'Create Team'}
-				</button>
-			</div>
-		</form>
-	</div>
+		<div class="flex justify-end gap-4">
+			<Button variant="outline" href="/admin/teams">Cancel</Button>
+			<Button type="submit">Create Team</Button>
+		</div>
+	</form>
 </div>
