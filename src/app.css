@@ -1,53 +1,107 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g.otf') format('opentype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
+	:root {
+		--background: 343.4 0% 90%;
+		--foreground: 343.4 0% 5%;
+		--card: 343.4 0% 90%;
+		--card-foreground: 343.4 0% 10%;
+		--popover: 343.4 0% 95%;
+		--popover-foreground: 343.4 95% 0%;
+		--primary: 343.4 88.7% 48.6%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 343.4 10% 70%;
+		--secondary-foreground: 0 0% 0%;
+		--muted: 21.4 10% 85%;
+		--muted-foreground: 343.4 0% 35%;
+		--accent: 21.4 10% 80%;
+		--accent-foreground: 343.4 0% 10%;
+		--destructive: 0 50% 30%;
+		--destructive-foreground: 343.4 0% 90%;
+		--border: 343.4 20% 50%;
+		--input: 343.4 20% 18%;
+		--ring: 343.4 88.7% 45.3%;
+		--radius: 0.4rem;
+		--chart-1: 343.4 89% 49%;
+		--chart-2: 55.4 89% 49%;
+		--chart-3: 127.4 89% 49%;
+		--chart-4: 199.4 89% 49%;
+		--chart-5: 271.4 89% 49%;
+		--sidebar-background: 343, 0%, 86%;
+		--sidebar-foreground: 343, 0%, 5%;
+		--sidebar-primary: 343, 89%, 44%;
+		--sidebar-primary-foreground: 0 0% 0%;
+		--sidebar-accent: 21, 10%, 76%;
+		--sidebar-accent-foreground: 0 0% 0%;
+		--sidebar-border: 343, 20%, 48%;
+		--sidebar-ring: 333, 98%, 45%;
 	}
-
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g_black.otf') format('opentype');
-		font-weight: 900;
-		font-style: normal;
-		font-display: swap;
+	.dark {
+		--background: 343.4 10% 5%;
+		--foreground: 343.4 0% 90%;
+		--card: 343.4 0% 0%;
+		--card-foreground: 343.4 0% 90%;
+		--popover: 343.4 10% 5%;
+		--popover-foreground: 343.4 0% 90%;
+		--primary: 343.4 88.7% 48.6%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 343.4 10% 10%;
+		--secondary-foreground: 0 0% 100%;
+		--muted: 21.4 10% 15%;
+		--muted-foreground: 343.4 0% 60%;
+		--accent: 21.4 10% 15%;
+		--accent-foreground: 343.4 0% 90%;
+		--destructive: 0 50% 30%;
+		--destructive-foreground: 343.4 0% 90%;
+		--border: 343.4 20% 18%;
+		--input: 343.4 20% 18%;
+		--ring: 343.4 88.7% 45.3%;
+		--radius: 0.4rem;
+		--chart-1: 343.4 89% 49%;
+		--chart-2: 55.4 89% 49%;
+		--chart-3: 127.4 89% 49%;
+		--chart-4: 199.4 89% 49%;
+		--chart-5: 271.4 89% 49%;
+		--sidebar-background: 343, 10%, 7%;
+		--sidebar-foreground: 343, 0%, 99%;
+		--sidebar-primary: 343, 89%, 39%;
+		--sidebar-primary-foreground: 0 0% 100%;
+		--sidebar-accent: 21, 10%, 13%;
+		--sidebar-accent-foreground: 0 0% 100%;
+		--sidebar-border: 343, 20%, 17%;
+		--sidebar-ring: 333, 98%, 45%;
 	}
+}
 
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g_bold.otf') format('opentype');
-		font-weight: 700;
-		font-style: normal;
-		font-display: swap;
+@layer base {
+	* {
+		@apply border-border;
 	}
-
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g_medium.otf') format('opentype');
-		font-weight: 500;
-		font-style: normal;
-		font-display: swap;
+	body {
+		@apply bg-background text-foreground;
+		border: 3px solid #ea0e4b;
+		margin: 8px;
 	}
-
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g_light.otf') format('opentype');
-		font-weight: 300;
-		font-style: normal;
-		font-display: swap;
+	main:before {
+		content: '';
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 0;
+		height: 0;
+		border-right: 30px solid transparent;
+		border-top: 30px solid #ea0e4b;
+		z-index: 0;
 	}
-
-	@font-face {
-		font-family: 'DIN Next W1G';
-		src: url('/fonts/dinnextw1g_ultralight.otf') format('opentype');
-		font-weight: 200;
-		font-style: normal;
-		font-display: swap;
+	main:after {
+		content: '';
+		position: fixed;
+		bottom: 0;
+		right: 0;
+		border-left: 30px solid transparent;
+		border-bottom: 30px solid #ea0e4b;
+		z-index: 0;
 	}
 }

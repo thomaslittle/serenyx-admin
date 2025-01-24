@@ -3,13 +3,13 @@
   import { supabase } from '$lib/supabase/client';
   import type { RealtimeChannel } from '@supabase/supabase-js';
   import type { Database } from '$lib/supabase/types';
-  
+
   export let matchId: string;
-  
+
   type Match = Database['public']['Tables']['matches']['Row'];
   type Team = Database['public']['Tables']['teams']['Row'];
   type Player = Database['public']['Tables']['players']['Row'];
-  
+
   let match: Match | null = null;
   let team1: Team | null = null;
   let team2: Team | null = null;
@@ -20,7 +20,7 @@
   onMount(async () => {
     // Initial data fetch
     await fetchMatchData();
-    
+
     // Set up real-time subscription
     channel = supabase
       .channel(`match_${matchId}`)
@@ -49,11 +49,13 @@
     // Fetch match data
     const { data: matchData } = await supabase
       .from('matches')
-      .select(`
+      .select(
+        `
         *,
         team1:teams!team1_id(*),
         team2:teams!team2_id(*)
-      `)
+      `
+      )
       .eq('id', matchId)
       .single();
 
@@ -79,38 +81,38 @@
   }
 </script>
 
-<div class="fixed inset-0 pointer-events-none select-none">
+<div class="pointer-events-none fixed inset-0 select-none">
   <!-- Top score bar -->
-  <div class="absolute top-0 left-0 right-0 h-24 bg-black bg-opacity-90">
-    <div class="relative h-full flex items-center justify-center">
+  <div class="absolute left-0 right-0 top-0 h-24 bg-black bg-opacity-90">
+    <div class="relative flex h-full items-center justify-center">
       <!-- Red accent line -->
-      <div class="absolute top-0 left-0 right-0 h-1 bg-red-600" />
-      
+      <div class="absolute left-0 right-0 top-0 h-1 bg-primary" />
+
       <!-- Team 1 -->
       <div class="flex items-center space-x-8">
         <div class="flex items-center space-x-4">
           {#if team1?.logo_url}
-            <img src={team1.logo_url} alt={team1.name} class="w-16 h-16 object-contain" />
+            <img src={team1.logo_url} alt={team1.name} class="h-16 w-16 object-contain" />
           {/if}
-          <span class="text-white text-2xl font-bold">{team1?.name || 'TBD'}</span>
+          <span class="text-2xl font-bold text-white">{team1?.name || 'TBD'}</span>
         </div>
-        
+
         <!-- Score -->
         <div class="flex items-center space-x-4">
-          <div class="w-20 h-16 bg-red-600 flex items-center justify-center">
-            <span class="text-white text-3xl font-bold">{match?.team1_score || 0}</span>
+          <div class="flex h-16 w-20 items-center justify-center bg-primary">
+            <span class="text-3xl font-bold text-white">{match?.team1_score || 0}</span>
           </div>
-          <span class="text-red-600 text-2xl font-bold">-</span>
-          <div class="w-20 h-16 bg-red-600 flex items-center justify-center">
-            <span class="text-white text-3xl font-bold">{match?.team2_score || 0}</span>
+          <span class="text-2xl font-bold text-primary">-</span>
+          <div class="flex h-16 w-20 items-center justify-center bg-primary">
+            <span class="text-3xl font-bold text-white">{match?.team2_score || 0}</span>
           </div>
         </div>
-        
+
         <!-- Team 2 -->
         <div class="flex items-center space-x-4">
-          <span class="text-white text-2xl font-bold">{team2?.name || 'TBD'}</span>
+          <span class="text-2xl font-bold text-white">{team2?.name || 'TBD'}</span>
           {#if team2?.logo_url}
-            <img src={team2.logo_url} alt={team2.name} class="w-16 h-16 object-contain" />
+            <img src={team2.logo_url} alt={team2.name} class="h-16 w-16 object-contain" />
           {/if}
         </div>
       </div>
@@ -124,7 +126,7 @@
         <!-- Team 1 players -->
         <div class="space-y-2">
           {#each team1Players as player}
-            <div class="flex items-center justify-between text-white text-sm">
+            <div class="flex items-center justify-between text-sm text-white">
               <span class="font-bold">{player.name}</span>
               <div class="flex space-x-4">
                 <span>G: {player.stats.goals}</span>
@@ -137,18 +139,24 @@
 
         <!-- Match stats -->
         <div class="flex flex-col items-center justify-center text-white">
-          <div class="text-sm text-red-600 font-bold">MATCH STATS</div>
+          <div class="text-sm font-bold text-primary">MATCH STATS</div>
           <div class="mt-2 grid grid-cols-3 gap-x-8 text-center">
             <div>
-              <div class="text-2xl font-bold">{team1Players.reduce((sum, p) => sum + p.stats.shots, 0)}</div>
+              <div class="text-2xl font-bold">
+                {team1Players.reduce((sum, p) => sum + p.stats.shots, 0)}
+              </div>
               <div class="text-xs text-gray-400">SHOTS</div>
             </div>
             <div>
-              <div class="text-2xl font-bold">{team1Players.reduce((sum, p) => sum + p.stats.saves, 0)}</div>
+              <div class="text-2xl font-bold">
+                {team1Players.reduce((sum, p) => sum + p.stats.saves, 0)}
+              </div>
               <div class="text-xs text-gray-400">SAVES</div>
             </div>
             <div>
-              <div class="text-2xl font-bold">{team1Players.reduce((sum, p) => sum + p.stats.assists, 0)}</div>
+              <div class="text-2xl font-bold">
+                {team1Players.reduce((sum, p) => sum + p.stats.assists, 0)}
+              </div>
               <div class="text-xs text-gray-400">ASSISTS</div>
             </div>
           </div>
@@ -157,7 +165,7 @@
         <!-- Team 2 players -->
         <div class="space-y-2">
           {#each team2Players as player}
-            <div class="flex items-center justify-between text-white text-sm">
+            <div class="flex items-center justify-between text-sm text-white">
               <span class="font-bold">{player.name}</span>
               <div class="flex space-x-4">
                 <span>G: {player.stats.goals}</span>

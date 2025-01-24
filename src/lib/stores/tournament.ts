@@ -46,11 +46,13 @@ export async function fetchDivisionStandings() {
 export async function fetchScheduledMatches() {
   const { data, error } = await supabase
     .from('matches')
-    .select(`
+    .select(
+      `
       *,
       team1:teams!team1_id(name),
       team2:teams!team2_id(name)
-    `)
+    `
+    )
     .in('status', ['upcoming', 'live'])
     .order('start_time');
 
@@ -59,7 +61,7 @@ export async function fetchScheduledMatches() {
     return;
   }
 
-  const formattedMatches = data.map(match => ({
+  const formattedMatches = data.map((match) => ({
     id: match.id,
     time: new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     team1: match.team1.name,

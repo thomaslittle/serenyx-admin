@@ -1,24 +1,53 @@
+import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { createSupabaseLoadClient } from '@supabase/auth-helpers-sveltekit';
-import type { Database } from '$lib/supabase/types';
-import { authStore } from '$lib/stores/auth';
+import type { LayoutLoad } from './$types';
+import { auth } from '$lib/stores/auth';
 
-export const load = async ({ fetch, data, depends }) => {
+export const load: LayoutLoad = async ({ data, depends, fetch }) => {
   depends('supabase:auth');
 
-  const supabase = createSupabaseLoadClient<Database>({
-    supabaseUrl: PUBLIC_SUPABASE_URL,
-    supabaseKey: PUBLIC_SUPABASE_ANON_KEY,
-    event: { fetch },
-    serverSession: data.session
-  });
+  const supabase = isBrowser()
+    ? createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+        global: {
+          fetch
+        },
+        auth: { persistSession: true }
+      })
+    : createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+        global: {
+          fetch
+        },
+        cookies: {
+          getAll() {
+            return data.cookies;
+          }
+        }
+      });
 
   const {
     data: { session }
   } = await supabase.auth.getSession();
 
-  // Update auth store
-  authStore.setSession(session);
+  if (session?.user) {
+    const role = session.user.role || 'user';
+    console.log('Root layout session:', { user: session.user.email, role });
 
-  return { supabase, session };
+    auth.set({
+      user: session.user,
+      role
+    });
+
+    return {
+      session,
+      role
+    };
+  }
+
+  console.log('No session found in root layout');
+  auth.set({ user: null, role: 'user' });
+
+  return {
+    session: null,
+    role: 'user'
+  };
 };
