@@ -32,7 +32,9 @@
 <div class="flex min-h-screen items-center justify-center bg-neutral-900">
   <div class="w-full max-w-md space-y-8 rounded-lg bg-neutral-800 p-6 shadow-lg">
     <div>
-      <h2 class="text-center text-3xl font-bold tracking-tight text-white">Reset your password</h2>
+      <h2 class="font-heading text-center text-3xl font-bold tracking-tight text-white">
+        Reset your password
+      </h2>
       <p class="mt-2 text-center text-sm text-gray-400">
         Enter your email address and we'll send you a password reset link
       </p>
@@ -73,7 +75,7 @@
 
         {#if error}
           <div class="rounded-md bg-red-500 p-4">
-            <p class="text-sm text-white">{error}</p>
+            <p class="text-sm capitalize leading-none text-neutral-900 dark:text-white">{error}</p>
           </div>
         {/if}
 
@@ -81,7 +83,7 @@
           <button
             type="submit"
             disabled={loading}
-            class="group relative flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50"
+            class="group relative flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50"
           >
             {loading ? 'Sending reset link...' : 'Send reset link'}
           </button>

@@ -41,13 +41,13 @@
   }
 </script>
 
-<div class="min-h-screen bg-neutral-900 p-8">
+<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
   <div class="mx-auto max-w-7xl">
-    <h2 class="mb-8 text-2xl font-bold text-white">Tournament Overlay Controls</h2>
+    <h2 class="font-heading mb-8 text-2xl font-bold text-white">Tournament Overlay Controls</h2>
 
     <!-- Overlay Selection -->
-    <div class="mb-8 rounded-lg bg-neutral-800 p-6">
-      <h3 class="mb-4 text-lg font-medium text-white">Select Component</h3>
+    <div class="mb-8 rounded-lg bg-neutral-200 p-6 dark:bg-neutral-800">
+      <h3 class="mb-4 text-lg font-medium text-neutral-900 dark:text-white">Select Component</h3>
 
       <div class="space-y-4">
         <div class="flex items-center space-x-4">
@@ -58,7 +58,7 @@
             value="ticker"
             class="h-4 w-4 border-gray-600 bg-neutral-700 text-primary focus:ring-red-600"
           />
-          <label for="ticker" class="text-white">Match Schedule Ticker</label>
+          <label for="ticker" class="text-neutral-900 dark:text-white">Match Schedule Ticker</label>
         </div>
 
         <div class="flex items-center space-x-4">
@@ -69,13 +69,13 @@
             value="standings"
             class="h-4 w-4 border-gray-600 bg-neutral-700 text-primary focus:ring-red-600"
           />
-          <label for="standings" class="text-white">Division Standings</label>
+          <label for="standings" class="text-neutral-900 dark:text-white">Division Standings</label>
         </div>
       </div>
 
       <button
         on:click={generateOverlayUrl}
-        class="mt-6 rounded-md bg-primary px-4 py-2 text-white transition-colors hover:bg-red-500"
+        class="mt-6 rounded-md bg-primary px-4 py-2 text-white transition-colors"
       >
         Generate Overlay URL
       </button>
@@ -84,11 +84,11 @@
     <!-- Component Settings -->
     <div class="mt-8 space-y-8">
       {#if selectedComponent === 'ticker'}
-        <div class="rounded-lg bg-neutral-800 p-6">
-          <h3 class="mb-4 text-lg font-medium text-white">Ticker Settings</h3>
+        <div class="rounded-lg bg-neutral-200 p-6 dark:bg-neutral-800">
+          <h3 class="mb-4 text-lg font-medium text-neutral-900 dark:text-white">Ticker Settings</h3>
           <div class="space-y-4">
             <div>
-              <label class="mb-2 block text-sm font-medium text-white">
+              <label class="mb-2 block text-sm font-medium text-neutral-900 dark:text-white">
                 Update Interval (seconds)
               </label>
               <input
@@ -102,11 +102,15 @@
           </div>
         </div>
       {:else if selectedComponent === 'standings'}
-        <div class="rounded-lg bg-neutral-800 p-6">
-          <h3 class="mb-4 text-lg font-medium text-white">Standings Settings</h3>
+        <div class="rounded-lg bg-neutral-200 p-6 dark:bg-neutral-800">
+          <h3 class="mb-4 text-lg font-medium text-neutral-900 dark:text-white">
+            Standings Settings
+          </h3>
           <div class="space-y-4">
             <div>
-              <label class="mb-2 block text-sm font-medium text-white"> Divisions to Show </label>
+              <label class="mb-2 block text-sm font-medium text-neutral-900 dark:text-white">
+                Divisions to Show
+              </label>
               <div class="space-y-2">
                 {#each $divisions as division}
                   <label class="flex items-center space-x-2">
@@ -122,7 +126,7 @@
               </div>
             </div>
             <div>
-              <label class="mb-2 block text-sm font-medium text-white">
+              <label class="mb-2 block text-sm font-medium text-neutral-900 dark:text-white">
                 Auto-expand Interval (seconds)
               </label>
               <input
@@ -141,8 +145,8 @@
 
     {#if overlayUrl}
       <!-- Overlay URL -->
-      <div class="mb-8 rounded-lg bg-neutral-800 p-6">
-        <h3 class="mb-4 text-lg font-medium text-white">Overlay URL</h3>
+      <div class="mb-8 rounded-lg bg-neutral-200 p-6 dark:bg-neutral-800">
+        <h3 class="mb-4 text-lg font-medium text-neutral-900 dark:text-white">Overlay URL</h3>
         <div class="flex items-center space-x-4">
           <input
             type="text"
@@ -161,7 +165,7 @@
       </div>
 
       <!-- Preview -->
-      <div class="rounded-lg bg-neutral-800 p-6">
+      <div class="rounded-lg bg-neutral-800 p-6 dark:bg-neutral-800">
         <h3 class="mb-4 text-lg font-medium text-white">Preview</h3>
         <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-neutral-900">
           <iframe title="Overlay Preview" src={overlayUrl} class="h-full w-full border-0"></iframe>

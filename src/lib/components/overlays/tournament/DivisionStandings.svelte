@@ -45,7 +45,7 @@
   >
     <div class="flex items-center space-x-2">
       <Trophy class="h-5 w-5 text-white" />
-      <h2 class="text-xl font-bold tracking-wider text-white">{divisionName}</h2>
+      <h2 class="font-heading text-xl font-bold tracking-wider text-white">{divisionName}</h2>
     </div>
     <ChevronRight
       class="h-6 w-6 text-white transition-transform duration-300"

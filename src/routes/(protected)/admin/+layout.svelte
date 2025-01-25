@@ -3,7 +3,9 @@
   import { supabase } from '$lib/supabase/client';
   import { theme } from '$lib/stores/theme';
   import { onMount } from 'svelte';
-  import Footer from '$lib/components/footer.svelte';
+  import Footer from '$lib/components/Footer.svelte';
+  import BackgroundImage from '$lib/components/BackgroundImage.svelte';
+
   let isMenuOpen = false;
 
   const navigationItems = [
@@ -32,8 +34,12 @@
   });
 </script>
 
-<div class="bg-whit min-h-screen">
-  <nav class="border-b border-gray-200 bg-neutral-100 dark:border-gray-800 dark:bg-neutral-800">
+<BackgroundImage src="/images/bg.webp" alt="Abstract background" opacity={0.5} zIndex={0} />
+
+<div class="relative min-h-screen">
+  <nav
+    class="border-b border-neutral-200 bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-800 sm:px-8"
+  >
     <div class="mx-auto max-w-7xl">
       <div class="flex h-16 items-center justify-between">
         <div class="flex items-center">
@@ -46,7 +52,7 @@
                 <a
                   href={item.href}
                   class="{$page.url.pathname === item.href
-                    ? 'bg-neutral-200 text-gray-900 dark:bg-neutral-900 dark:text-white'
+                    ? 'bg-neutral-200 text-gray-900 dark:bg-neutral-900/80 dark:text-white'
                     : 'text-gray-600 hover:bg-neutral-200 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-neutral-700 dark:hover:text-white'} rounded-md px-3 py-2 text-sm font-medium"
                   aria-current={$page.url.pathname === item.href ? 'page' : undefined}
                 >
@@ -61,7 +67,7 @@
             <button
               type="button"
               onclick={toggleTheme}
-              class="rounded-md px-2 py-2 text-sm font-semibold hover:bg-neutral-200 dark:text-white dark:hover:bg-neutral-900"
+              class="rounded-md px-2 py-2 text-sm font-semibold hover:bg-neutral-200 dark:text-white dark:hover:bg-neutral-900/80"
               aria-label={$theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {#if $theme === 'dark'}
@@ -109,7 +115,7 @@
             <button
               type="button"
               onclick={handleSignOut}
-              class="rounded-md bg-primary px-2 py-2 text-sm font-semibold text-white hover:bg-red-500"
+              class="rounded-md bg-primary px-2 py-2 text-sm font-semibold text-white"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -191,7 +197,7 @@
         <button
           type="button"
           onclick={handleSignOut}
-          class="mt-4 block w-full rounded-md bg-primary px-3 py-2 text-base font-medium text-white hover:bg-red-500"
+          class="mt-4 block w-full rounded-md bg-primary px-3 py-2 text-base font-medium text-white"
         >
           <div class="flex items-center gap-2">
             <svg

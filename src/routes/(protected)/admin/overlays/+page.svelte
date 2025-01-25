@@ -35,12 +35,12 @@
   ];
 </script>
 
-<div class="min-h-screen bg-neutral-900 p-8">
+<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
   <div class="mx-auto max-w-7xl">
     <div class="md:flex md:items-center md:justify-between">
       <div class="min-w-0 flex-1">
         <h2
-          class="text-2xl font-bold uppercase leading-7 tracking-widest text-white sm:truncate sm:text-3xl"
+          class="font-heading text-2xl font-bold uppercase leading-7 text-neutral-900 dark:text-white sm:truncate sm:text-3xl"
         >
           Broadcast Overlays
         </h2>
@@ -50,15 +50,17 @@
     <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {#each overlays as overlay}
         <div
-          class="group relative rounded-lg bg-neutral-800 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-red-500"
+          class="group relative rounded-lg bg-neutral-100 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-red-500 dark:bg-neutral-800"
         >
           <div>
-            <span class="inline-flex rounded-lg bg-primary p-3 text-white ring-4 ring-gray-800">
+            <span
+              class="inline-flex rounded-lg bg-primary p-3 ring-4 ring-gray-800 dark:text-white"
+            >
               <!-- Icon placeholder -->
             </span>
           </div>
           <div class="mt-8">
-            <h3 class="text-lg font-medium text-white">
+            <h3 class="text-lg font-medium text-neutral-900 dark:text-white">
               <a href={`/admin/overlays/${overlay.id}`} class="focus:outline-none">
                 {overlay.name}
                 <span class="absolute inset-0" aria-hidden="true" />
@@ -78,13 +80,13 @@
           <div class="mt-4 flex space-x-2">
             <a
               href={`/admin/overlays/${overlay.id}/settings`}
-              class="inline-flex items-center rounded-md bg-neutral-700 px-3 py-2 text-sm font-semibold text-white hover:bg-neutral-600"
+              class="inline-flex items-center rounded-md bg-neutral-200 px-3 py-2 text-sm font-semibold text-neutral-900 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
             >
               Settings
             </a>
             <a
               href={`${overlay.url}/preview`}
-              class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-red-500"
+              class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -96,20 +98,20 @@
     </div>
 
     <!-- Quickstart Guide -->
-    <div class="mt-12 rounded-lg bg-neutral-800 p-6">
-      <h3 class="mb-4 text-lg font-medium text-white">Quickstart Guide</h3>
+    <div class="mt-12 rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
+      <h2 class="font-heading mb-4 text-2xl font-black uppercase text-primary">Quickstart Guide</h2>
       <div class="prose prose-invert max-w-none">
-        <ol class="space-y-4 text-gray-300">
+        <ol class="space-y-4 text-neutral-900 dark:text-white">
           <li>
-            <strong class="text-white">Select an overlay:</strong> Choose the overlay type for the to
-            broadcast.
+            <strong class="text-neutral-900 dark:text-white">Select an overlay:</strong> Choose the overlay
+            type for the to broadcast.
           </li>
           <li>
-            <strong class="text-white">Configure settings:</strong> Customize the overlay appearance
-            and behavior in the settings panel.
+            <strong class="text-neutral-900 dark:text-white">Configure settings:</strong> Customize the
+            overlay appearance and behavior in the settings panel.
           </li>
           <li>
-            <strong class="text-white">Add to OBS:</strong>
+            <strong class="text-neutral-900 dark:text-white">Add to OBS:</strong>
             <ul class="mt-2 space-y-2">
               <li>Add a new "Browser" source in OBS</li>
               <li>Copy the overlay URL from the settings or preview page</li>

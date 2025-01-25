@@ -2,6 +2,10 @@
   import { supabase } from '$lib/supabase/client';
   import { auth } from '$lib/stores/auth';
   import type { AuthError } from '@supabase/supabase-js';
+  import { Button } from '$lib/components/ui/button/index.js';
+  import { Input } from '$lib/components/ui/input/index.js';
+  import { Label } from '$lib/components/ui/label/index.js';
+  import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
 
   let email = '';
   let password = '';
@@ -10,27 +14,93 @@
 
   async function handleLogin() {
     try {
+      console.log('Starting login process...');
       loading = true;
       error = null;
 
+      console.log('Attempting sign in with:', { email });
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      if (signInError) throw signInError;
+      if (signInError) {
+        console.error('Sign in error:', signInError);
+        throw signInError;
+      }
+
+      console.log('Sign in successful:', data);
 
       if (data.session) {
-        const role = data.session.user.role || 'user';
-        console.log('Login successful:', { user: data.session.user.email, role });
+        const { user } = data.session;
+        console.log('User from session:', user);
+
+        // Get role from database
+        console.log('Fetching role from database for user:', user.id);
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        console.log('Role query result:', { roleData, roleError });
+
+        if (roleError) {
+          console.error('Error fetching role:', roleError);
+          console.log('User ID:', user.id);
+
+          // Try to get all roles for debugging
+          console.log('Attempting to fetch all roles...');
+          const { data: allRoles, error: allRolesError } = await supabase
+            .from('user_roles')
+            .select('*');
+
+          console.log('All roles query result:', { allRoles, allRolesError });
+        }
+
+        // Check both user_roles table and app_metadata
+        const dbRole = roleData?.role;
+        const metadataRole = user.app_metadata?.role;
+        console.log('Roles found:', { dbRole, metadataRole, rawMetadata: user.app_metadata });
+
+        // If user has admin in metadata but not in db, sync it using the RPC function
+        if (metadataRole === 'admin' && !dbRole) {
+          console.log('Attempting to sync admin role using RPC...');
+          const { data: rpcData, error: syncError } = await supabase.rpc('set_role', {
+            input_user_id: user.id,
+            input_role: 'admin'
+          });
+
+          console.log('RPC result:', { rpcData, syncError });
+
+          if (syncError) {
+            console.error('Error syncing role:', syncError);
+          } else {
+            console.log('Successfully synced admin role');
+
+            // Fetch the updated role
+            console.log('Fetching updated role...');
+            const { data: updatedRole, error: fetchError } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', user.id)
+              .maybeSingle();
+
+            console.log('Updated role query result:', { updatedRole, fetchError });
+          }
+        }
+
+        // Use metadata role if available, otherwise use db role or default to authenticated
+        const role = metadataRole || dbRole || 'authenticated';
 
         // Update auth store
         auth.set({
-          user: data.session.user,
+          user,
           role
         });
 
         // Force a full page reload to ensure session is properly initialized
+        console.log('Redirecting to:', role === 'admin' ? '/admin' : '/');
         window.location.href = role === 'admin' ? '/admin' : '/';
       }
     } catch (e) {
@@ -42,48 +112,41 @@
   }
 </script>
 
-<div class="min-h-screen bg-neutral-900 p-8">
+<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
   <div class="mx-auto max-w-md">
-    <div class="rounded-lg bg-neutral-800 p-8">
-      <h1 class="mb-6 text-3xl font-bold text-white">Login</h1>
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-2xl font-bold">Login</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form on:submit|preventDefault={handleLogin} class="space-y-4">
+          <div class="space-y-2">
+            <Label for="email">Email</Label>
+            <Input type="email" id="email" bind:value={email} autocomplete="email" required />
+          </div>
 
-      <form on:submit|preventDefault={handleLogin} class="space-y-4">
-        <div>
-          <label for="email" class="block text-sm font-medium text-white">Email</label>
-          <input
-            type="email"
-            id="email"
-            bind:value={email}
-            autocomplete="email"
-            class="mt-1 block w-full rounded-md border-gray-600 bg-neutral-700 text-white"
-            required
-          />
-        </div>
+          <div class="space-y-2">
+            <Label for="password">Password</Label>
+            <Input
+              type="password"
+              id="password"
+              bind:value={password}
+              autocomplete="current-password"
+              required
+            />
+          </div>
 
-        <div>
-          <label for="password" class="block text-sm font-medium text-white">Password</label>
-          <input
-            type="password"
-            id="password"
-            bind:value={password}
-            autocomplete="current-password"
-            class="mt-1 block w-full rounded-md border-gray-600 bg-neutral-700 text-white"
-            required
-          />
-        </div>
+          {#if error}
+            <div class="rounded-md bg-red-500 p-3 text-sm text-white">
+              {error}
+            </div>
+          {/if}
 
-        {#if error}
-          <div class="rounded-md bg-red-500 p-3 text-white">{error}</div>
-        {/if}
-
-        <button
-          type="submit"
-          class="hover:bg-primary-dark w-full rounded-md bg-primary px-4 py-2 text-white disabled:opacity-50"
-          disabled={loading}
-        >
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
-    </div>
+          <Button type="submit" class="w-full" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   </div>
 </div>

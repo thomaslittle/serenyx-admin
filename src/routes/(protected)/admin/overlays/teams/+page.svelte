@@ -83,11 +83,11 @@
   }
 </script>
 
-<div class="min-h-screen bg-neutral-900 p-8">
+<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
   <div class="mx-auto max-w-7xl">
     <div class="md:flex md:items-center md:justify-between">
       <div class="min-w-0 flex-1">
-        <h2 class="text-2xl font-bold uppercase tracking-widest text-white sm:text-3xl">
+        <h2 class="font-heading text-2xl font-bold uppercase text-white sm:text-3xl">
           Team Overlays
         </h2>
       </div>
@@ -95,13 +95,13 @@
 
     {#if error}
       <div class="mt-4 rounded-md bg-red-500 p-4">
-        <p class="text-sm text-white">{error}</p>
+        <p class="text-sm capitalize leading-none text-neutral-900 dark:text-white">{error}</p>
       </div>
     {/if}
 
     <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
       <!-- Team Selection -->
-      <div class="rounded-lg bg-neutral-800 p-6">
+      <div class="rounded-lg bg-neutral-800 p-6 dark:bg-neutral-800">
         <h3 class="text-lg font-medium text-white">Available Teams</h3>
         {#if loading}
           <div class="mt-4 text-white">Loading teams...</div>
@@ -117,7 +117,7 @@
                 </div>
                 <button
                   on:click={() => addTeamToOverlay(team)}
-                  class="bg-primarypx-2.5 inline-flex items-center rounded-md py-1.5 text-sm font-semibold text-white hover:bg-red-500"
+                  class="bg-primarypx-2.5 inline-flex items-center rounded-md py-1.5 text-sm font-semibold text-white"
                 >
                   Add to Overlay
                 </button>
@@ -128,7 +128,7 @@
       </div>
 
       <!-- Overlay Preview and Controls -->
-      <div class="rounded-lg bg-neutral-800 p-6">
+      <div class="rounded-lg bg-neutral-800 p-6 dark:bg-neutral-800">
         <h3 class="text-lg font-medium text-white">Current Overlay</h3>
         <div class="mt-4">
           {#if selectedTeams.length === 0}
@@ -153,7 +153,7 @@
                     </button>
                     <button
                       on:click={() => removeTeamFromOverlay(team.id)}
-                      class="bg-primarypx-2.5 inline-flex items-center rounded-md py-1.5 text-sm font-semibold text-white hover:bg-red-500"
+                      class="bg-primarypx-2.5 inline-flex items-center rounded-md py-1.5 text-sm font-semibold text-white"
                     >
                       Remove
                     </button>

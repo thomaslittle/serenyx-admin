@@ -100,11 +100,11 @@
   }
 </script>
 
-<div class="min-h-screen bg-neutral-900 p-8">
+<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
   <div class="mx-auto max-w-3xl">
     <div class="md:flex md:items-center md:justify-between">
       <div class="min-w-0 flex-1">
-        <h2 class="text-2xl font-bold text-white sm:text-3xl">
+        <h2 class="font-heading text-2xl font-bold text-white sm:text-3xl">
           {#if loading}
             Loading...
           {:else if team}
@@ -126,7 +126,7 @@
             type="button"
             on:click={deleteTeam}
             disabled={saving}
-            class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-50"
+            class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
           >
             Delete Team
           </button>
@@ -136,7 +136,7 @@
 
     {#if error}
       <div class="mt-4 rounded-md bg-red-500 p-4">
-        <p class="text-sm text-white">{error}</p>
+        <p class="text-sm capitalize leading-none text-neutral-900 dark:text-white">{error}</p>
       </div>
     {/if}
 

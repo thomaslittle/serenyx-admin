@@ -27,7 +27,7 @@
           alt="Serenyx Logo"
           class="h-12 w-12 whitespace-normal rounded-full object-cover p-2"
         />
-        <!-- <span class="leading-2 text-3xl font-bold uppercase tracking-widest text-white"
+        <!-- <span class="leading-2 text-3xl font-bold uppercase text-white"
 					>Serenyx <span class="font-light">Broadcast</span></span
 				> -->
       </div>
@@ -66,12 +66,34 @@
       <!-- Quick Actions -->
       <div class="rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
         <h3
-          class="bg-fill border-l-2 border-primary pl-4 text-xl font-normal uppercase tracking-widest text-gray-900 dark:text-white"
+          class="bg-fill border-l-2 border-primary pl-4 text-xl font-black uppercase text-gray-900 dark:text-white"
+        >
+          Administration
+        </h3>
+        <div class="mt-4 space-y-4">
+          <a
+            href="/admin/users"
+            class="block w-full rounded-md bg-neutral-200 px-4 py-2 text-center text-sm font-medium text-gray-900 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
+          >
+            Manage Users
+          </a>
+          <a
+            href="/admin/profile"
+            class="block w-full rounded-md bg-neutral-200 px-4 py-2 text-center text-sm font-medium text-gray-900 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
+          >
+            Manage Profile
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
+        <h3
+          class="bg-fill border-l-2 border-primary pl-4 text-xl font-black uppercase text-gray-900 dark:text-white"
         >
           Quick Actions
         </h3>
         <div class="mt-4 space-y-4">
-          <Button.Root>Start Match Overlay</Button.Root>
           <a
             href="/admin/overlays/match"
             class="block w-full rounded-md bg-neutral-200 px-4 py-2 text-center text-sm font-medium text-gray-900 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
@@ -90,7 +112,7 @@
       <!-- Active Matches -->
       <div class="rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
         <h3
-          class="border-l-2 border-primary pl-4 text-xl font-normal uppercase tracking-widest text-gray-900 dark:text-white"
+          class="border-l-2 border-primary pl-4 text-xl font-black uppercase text-gray-900 dark:text-white"
         >
           Active Matches
         </h3>
@@ -99,22 +121,10 @@
         </div>
       </div>
 
-      <!-- Recent Updates -->
-      <div class="rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
-        <h3
-          class="border-l-2 border-primary pl-4 text-xl font-normal uppercase tracking-widest text-gray-900 dark:text-white"
-        >
-          Recent Updates
-        </h3>
-        <div class="mt-4">
-          <p class="text-gray-600 dark:text-gray-400">No recent updates</p>
-        </div>
-      </div>
-
       <!-- Planning -->
       <div class="rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
         <h3
-          class="border-l-2 border-primary pl-4 text-xl font-normal uppercase tracking-widest text-gray-900 dark:text-white"
+          class="border-l-2 border-primary pl-4 text-xl font-bold uppercase text-gray-900 dark:text-white"
         >
           Planning
         </h3>
@@ -131,6 +141,18 @@
           >
             Broadcast Script
           </a>
+        </div>
+      </div>
+
+      <!-- Recent Updates -->
+      <div class="rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
+        <h3
+          class="border-l-2 border-primary pl-4 text-xl font-bold uppercase text-gray-900 dark:text-white"
+        >
+          Recent Updates
+        </h3>
+        <div class="mt-4">
+          <p class="text-gray-600 dark:text-gray-400">No recent updates</p>
         </div>
       </div>
     </div>

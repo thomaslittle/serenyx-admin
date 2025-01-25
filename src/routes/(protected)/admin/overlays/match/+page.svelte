@@ -9,6 +9,7 @@
   import type { Match } from '$lib/types/match';
   import type { PageData } from './$types';
   import type { FormSchema } from './schema';
+  import { formSchema } from './schema';
 
   export let data: PageData;
 
@@ -16,8 +17,15 @@
   let selectedMatchId: string | null = null;
   let overlayUrl = '';
 
-  const { form, errors, enhance } = superForm(data.form, {
+  type FormType = {
+    matchId: string;
+  };
+
+  const { form, errors, enhance } = superForm<FormType>(data.form, {
+    id: 'match-form',
+    taintedMessage: null,
     dataType: 'json',
+    validators: zodClient(formSchema),
     onUpdated: ({ form }) => {
       if (form.valid) {
         selectedMatchId = form.data.matchId;
@@ -95,50 +103,62 @@
   }
 </script>
 
-<div class="min-h-screen p-8 dark:bg-neutral-900">
+<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
   <div class="mx-auto max-w-7xl">
-    <h2 class="mb-8 text-2xl font-bold text-neutral-900 dark:text-white">Match Overlay Control</h2>
+    <h2 class="font-heading mb-8 text-2xl font-bold text-neutral-900 dark:text-white">
+      Match Overlay Control
+    </h2>
 
     <!-- Match Selection -->
     <div class="mb-8 rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
       <h3 class="mb-4 text-lg font-medium text-neutral-900 dark:text-white">Select Match</h3>
 
       <form method="POST" use:enhance>
-        <Form.Field {form} {errors} name="matchId">
-          <Form.Control let:field>
-            <Form.Label>Match</Form.Label>
-            <Select.Root type="single" bind:value={$form.matchId} {...field}>
-              <Select.Trigger>
-                {#if $form.matchId && matches.length}
-                  {@const match = matches.find((m) => m.id === $form.matchId)}
-                  {#if match}
-                    {match.team1.name} vs {match.team2.name}
-                  {:else}
-                    Select a match
-                  {/if}
+        <div class="space-y-2">
+          <label for="matchId" class="text-sm font-medium text-neutral-900 dark:text-white"
+            >Match</label
+          >
+          <Select.Root
+            type="single"
+            value={$form.matchId}
+            onValueChange={(value) => {
+              $form.matchId = value;
+              selectedMatchId = value;
+              generateOverlayUrl();
+            }}
+          >
+            <Select.Trigger class="w-full">
+              {#if $form.matchId && matches.length}
+                {@const match = matches.find((m) => m.id === $form.matchId)}
+                {#if match}
+                  {match.team1.name} vs {match.team2.name}
                 {:else}
                   Select a match
                 {/if}
-              </Select.Trigger>
-              <Select.Content>
-                {#each matches as match}
-                  <Select.Item value={match.id}>
-                    {match.team1.name} vs {match.team2.name}
-                  </Select.Item>
-                {/each}
-              </Select.Content>
-            </Select.Root>
-          </Form.Control>
-          <Form.Description>Select a match to control its overlay</Form.Description>
-          <Form.FieldErrors />
-        </Form.Field>
+              {:else}
+                Select a match
+              {/if}
+            </Select.Trigger>
+            <Select.Content>
+              {#each matches as match}
+                <Select.Item value={match.id} class="cursor-pointer">
+                  {match.team1.name} vs {match.team2.name}
+                </Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+          <p class="text-sm text-gray-400">Select a match to control its overlay</p>
+          {#if $errors.matchId}
+            <p class="text-sm text-red-500">{$errors.matchId}</p>
+          {/if}
+        </div>
       </form>
     </div>
 
     {#if overlayUrl}
       <!-- Overlay URL -->
-      <div class="mb-8 rounded-lg bg-neutral-800 p-6">
-        <h3 class="mb-4 text-lg font-medium text-white">Overlay URL</h3>
+      <div class="mb-8 rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
+        <h3 class="mb-4 text-lg font-medium dark:text-white">Overlay URL</h3>
         <div class="flex items-center space-x-4">
           <input
             type="text"
@@ -161,8 +181,8 @@
       <!-- Match Controls -->
       <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
         <!-- Score Controls -->
-        <div class="rounded-lg bg-neutral-800 p-6">
-          <h3 class="mb-4 text-lg font-medium text-white">Score Controls</h3>
+        <div class="mb-8 rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
+          <h3 class="mb-4 text-lg font-medium dark:text-white">Score Controls</h3>
 
           {#if matches.length}
             {@const match = matches.find((m) => m.id === selectedMatchId)}
@@ -170,18 +190,18 @@
               <div class="space-y-6">
                 <!-- Team 1 -->
                 <div>
-                  <h4 class="mb-2 text-white">{match.team1.name}</h4>
+                  <h4 class="mb-2 dark:text-white">{match.team1.name}</h4>
                   <div class="flex items-center space-x-4">
                     <button
                       on:click={() => updateMatchScore(1, false)}
-                      class="rounded-md bg-neutral-700 px-4 py-2 text-white hover:bg-neutral-600"
+                      class="rounded-md bg-neutral-200 px-4 py-2 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
                     >
                       -
                     </button>
-                    <span class="text-xl font-bold text-white">{match.team1_score}</span>
+                    <span class="text-xl font-bold dark:text-white">{match.team1_score}</span>
                     <button
                       on:click={() => updateMatchScore(1, true)}
-                      class="rounded-md bg-neutral-700 px-4 py-2 text-white hover:bg-neutral-600"
+                      class="rounded-md bg-neutral-200 px-4 py-2 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
                     >
                       +
                     </button>
@@ -190,18 +210,18 @@
 
                 <!-- Team 2 -->
                 <div>
-                  <h4 class="mb-2 text-white">{match.team2.name}</h4>
+                  <h4 class="mb-2 dark:text-white">{match.team2.name}</h4>
                   <div class="flex items-center space-x-4">
                     <button
                       on:click={() => updateMatchScore(2, false)}
-                      class="rounded-md bg-neutral-700 px-4 py-2 text-white hover:bg-neutral-600"
+                      class="rounded-md bg-neutral-200 px-4 py-2 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
                     >
                       -
                     </button>
-                    <span class="text-xl font-bold text-white">{match.team2_score}</span>
+                    <span class="text-xl font-bold dark:text-white">{match.team2_score}</span>
                     <button
                       on:click={() => updateMatchScore(2, true)}
-                      class="rounded-md bg-neutral-700 px-4 py-2 text-white hover:bg-neutral-600"
+                      class="rounded-md bg-neutral-200 px-4 py-2 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
                     >
                       +
                     </button>
@@ -213,17 +233,17 @@
         </div>
 
         <!-- Match Status Controls -->
-        <div class="rounded-lg bg-neutral-800 p-6">
-          <h3 class="mb-4 text-lg font-medium text-white">Match Status</h3>
+        <div class="mb-8 rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
+          <h3 class="mb-4 text-lg font-medium dark:text-white">Match Status</h3>
 
           <div class="space-y-4">
             {#each ['upcoming', 'live', 'completed'] as status}
               {@const match = matches.find((m) => m.id === selectedMatchId)}
               <button
-                on:click={() => updateMatchStatus(status)}
-                class="w-full rounded-md px-4 py-2 text-white
+                on:click={() => updateMatchStatus(status as 'upcoming' | 'live' | 'completed')}
+                class="w-full rounded-md px-4 py-2 text-white dark:text-white
                   {match?.status === status
-                  ? 'bg-primary hover:bg-red-500'
+                  ? 'bg-primary '
                   : 'bg-neutral-700 hover:bg-neutral-600'}"
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}

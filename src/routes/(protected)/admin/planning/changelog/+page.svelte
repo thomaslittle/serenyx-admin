@@ -66,7 +66,7 @@
 <div class="min-h-screen bg-white dark:bg-neutral-900">
   <div class="mx-auto max-w-7xl py-8 sm:px-6">
     <div class="mb-8 flex items-center justify-between">
-      <h1 class="text-3xl font-bold uppercase tracking-widest text-gray-900 dark:text-white">
+      <h1 class="text-3xl font-bold uppercase text-gray-900 dark:text-white">
         Development Changelog
       </h1>
       <div class="space-x-4">
@@ -103,7 +103,9 @@
 
     {#if showHistory}
       <div class="mb-8 rounded-lg bg-neutral-100 p-4 dark:bg-neutral-800">
-        <h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Version History</h2>
+        <h2 class="font-heading mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+          Version History
+        </h2>
         <div class="space-y-2">
           {#each versions as version}
             <div

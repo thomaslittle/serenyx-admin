@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { auth } from '$lib/stores/auth';
+  import { auth, hasPermission } from '$lib/stores/auth';
   import { supabase } from '$lib/supabase/client';
 
   $: ({ user, role } = $auth);
@@ -34,11 +34,11 @@
 
         {#if user}
           <div class="mt-6 space-y-4 text-white">
-            <h2 class="text-xl font-semibold">Debug Information:</h2>
+            <h2 class="font-heading text-xl font-semibold">Debug Information:</h2>
             <div class="space-y-2 rounded-lg bg-neutral-700 p-4">
               <p>
                 Access Level: <span class="font-semibold text-primary"
-                  >{role === 'admin' ? 'Admin' : 'User'}</span
+                  >{role === 'admin' ? 'Admin' : role || 'User'}</span
                 >
               </p>
               <p>User ID: <span class="font-mono">{user.id}</span></p>
@@ -47,7 +47,17 @@
               <p>Last Sign In: {new Date(user.last_sign_in_at || '').toLocaleString()}</p>
               <p>Created At: {new Date(user.created_at).toLocaleString()}</p>
               <p>Auth Provider: {user.app_metadata.provider}</p>
-              <p>Database is_admin: {role === 'admin' ? 'Yes' : 'No'}</p>
+              <p>JWT Role: {user.user_metadata?.user_role || 'Not Set'}</p>
+              <p>App Role: {role || 'Not Set'}</p>
+              <p>Permissions:</p>
+              <ul class="ml-4 list-disc">
+                <li>
+                  Can Delete Channels: {hasPermission(role, 'channels.delete') ? 'Yes' : 'No'}
+                </li>
+                <li>
+                  Can Delete Messages: {hasPermission(role, 'messages.delete') ? 'Yes' : 'No'}
+                </li>
+              </ul>
               <details class="mt-4">
                 <summary class="cursor-pointer hover:text-primary">Raw User Object</summary>
                 <pre class="mt-2 overflow-auto rounded bg-neutral-800 p-2 text-xs">
@@ -65,7 +75,7 @@
         {/if}
 
         <div class="mt-8">
-          <h2 class="text-xl font-semibold text-white">Available Pages:</h2>
+          <h2 class="font-heading text-xl font-semibold text-white">Available Pages:</h2>
           <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {#if role === 'admin'}
               <a

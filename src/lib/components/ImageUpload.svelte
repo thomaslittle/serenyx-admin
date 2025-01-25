@@ -122,7 +122,7 @@
         <button
           type="button"
           on:click={removeImage}
-          class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-red-500"
+          class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white"
         >
           Remove Logo
         </button>

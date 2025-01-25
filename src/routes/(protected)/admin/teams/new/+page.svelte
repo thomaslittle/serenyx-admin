@@ -44,13 +44,11 @@
   }
 </script>
 
-<div class="min-h-screen bg-neutral-900 p-8">
+<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
   <div class="mx-auto max-w-3xl">
     <div class="md:flex md:items-center md:justify-between">
       <div class="min-w-0 flex-1">
-        <h2 class="text-2xl font-bold uppercase tracking-widest text-white sm:text-3xl">
-          New Team
-        </h2>
+        <h2 class="font-heading text-2xl font-bold uppercase text-white sm:text-3xl">New Team</h2>
       </div>
       <div class="mt-4 flex md:ml-4 md:mt-0">
         <a
@@ -64,7 +62,7 @@
 
     {#if error}
       <div class="mt-4 rounded-md bg-red-500 p-4">
-        <p class="text-sm text-white">{error}</p>
+        <p class="text-sm capitalize leading-none text-neutral-900 dark:text-white">{error}</p>
       </div>
     {/if}
 
@@ -141,7 +139,7 @@
         <button
           type="submit"
           disabled={loading}
-          class="w-full rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50"
+          class="w-full rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50"
         >
           {loading ? 'Creating...' : 'Create Team'}
         </button>
