@@ -6,7 +6,7 @@
   import type { DivisionStanding } from '$lib/types/tournament';
   import { divisions } from '$lib/stores/tournament';
   import { fetchDivisionStandings } from '$lib/stores/tournament';
-  
+
   // Get URL parameters
   $: component = $page.url.searchParams.get('component') || 'ticker';
   $: interval = parseInt($page.url.searchParams.get('interval') || '5', 10);
@@ -18,11 +18,11 @@
   });
 </script>
 
-<div class="fixed inset-0 pointer-events-none select-none">
+<div class="pointer-events-none fixed inset-0 select-none">
   {#if component === 'ticker'}
     <MatchTicker />
   {:else if component === 'standings'}
-    <div class="absolute right-0 top-0 p-4 space-y-4">
+    <div class="absolute right-0 top-0 space-y-4 p-4">
       {#each $divisions as division}
         {#if selectedDivisions.length === 0 || selectedDivisions.includes(division.name)}
           <DivisionStandings

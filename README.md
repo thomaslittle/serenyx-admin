@@ -29,6 +29,12 @@ Everything you need to build a Svelte project, powered by [`sv`](https://github.
 
 If you're seeing this, you've probably already done this step. Congrats!
 
+CREATE TEST LOCAL USER:
+`npx tsx scripts/create-admin.ts`
+
+DB RESTORE:
+`pg_restore -h hostname -U username -d database_name backup_file.dump`
+
 ```bash
 # create a new project in the current directory
 npx sv create

@@ -1,125 +1,159 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabase/client';
-	import { goto } from '$app/navigation';
+  import { supabase } from '$lib/supabase/client';
+  import { auth } from '$lib/stores/auth';
+  import type { AuthError } from '@supabase/supabase-js';
+  import { Button } from '$lib/components/ui/button/index.js';
+  import { Input } from '$lib/components/ui/input/index.js';
+  import { Label } from '$lib/components/ui/label/index.js';
+  import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription
+  } from '$lib/components/ui/card/index.js';
+  import { Separator } from '$lib/components/ui/separator/index.js';
+  import DiscordLogo from 'virtual:icons/logos/discord-icon';
 
-	let email = '';
-	let password = '';
-	let loading = false;
-	let error: string | null = null;
+  let email = '';
+  let password = '';
+  let loading = false;
+  let error: string | null = null;
 
-	async function handleLogin() {
-		try {
-			loading = true;
-			error = null;
+  async function handleLogin() {
+    try {
+      loading = true;
+      error = null;
 
-			const { error: signInError } = await supabase.auth.signInWithPassword({
-				email,
-				password
-			});
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-			if (signInError) {
-				error = signInError.message;
-				return;
-			}
+      if (signInError) throw signInError;
 
-			goto('/admin');
-		} catch (e) {
-			error = 'An unexpected error occurred';
-			console.error('Login error:', e);
-		} finally {
-			loading = false;
-		}
-	}
+      if (data.session) {
+        const { user } = data.session;
+
+        // Get role from database
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (roleError) throw roleError;
+
+        // Check both user_roles table and app_metadata
+        const dbRole = roleData?.role;
+        const metadataRole = user.app_metadata?.role;
+
+        // If user has admin in metadata but not in db, sync it
+        if (metadataRole === 'admin' && !dbRole) {
+          const { error: syncError } = await supabase.rpc('set_role', {
+            input_user_id: user.id,
+            input_role: 'admin'
+          });
+
+          if (syncError) throw syncError;
+        }
+
+        // Use metadata role if available, otherwise use db role or default to authenticated
+        const role = metadataRole || dbRole || 'authenticated';
+
+        // Update auth store
+        auth.set({ user, role });
+
+        // Redirect based on role
+        window.location.href = role === 'admin' ? '/admin' : '/';
+      }
+    } catch (e) {
+      error = (e as AuthError).message;
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function handleDiscordLogin() {
+    try {
+      loading = true;
+      error = null;
+
+      const { data, error: signInError } = await supabase.auth.signInWithOAuth({
+        provider: 'discord',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'identify email'
+        }
+      });
+
+      if (signInError) throw signInError;
+    } catch (e) {
+      error = (e as AuthError).message;
+      loading = false;
+    }
+  }
 </script>
 
-<div class="flex min-h-screen items-center justify-center bg-gray-900 px-4 py-12 sm:px-6 lg:px-8">
-	<div class="w-full max-w-md space-y-8">
-		<div>
-			<h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-white">
-				Sign in to your account
-			</h2>
-		</div>
-		<form class="mt-8 space-y-6" on:submit|preventDefault={handleLogin}>
-			<div class="-space-y-px rounded-md shadow-sm">
-				<div>
-					<label for="email-address" class="sr-only">Email address</label>
-					<input
-						id="email-address"
-						name="email"
-						type="email"
-						required
-						bind:value={email}
-						class="relative block w-full rounded-t-md border-0 bg-gray-800 p-1.5 text-white placeholder-gray-400 ring-1 ring-inset ring-gray-700 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6"
-						placeholder="Email address"
-					/>
-				</div>
-				<div>
-					<label for="password" class="sr-only">Password</label>
-					<input
-						id="password"
-						name="password"
-						type="password"
-						required
-						bind:value={password}
-						class="relative block w-full rounded-b-md border-0 bg-gray-800 p-1.5 text-white placeholder-gray-400 ring-1 ring-inset ring-gray-700 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6"
-						placeholder="Password"
-					/>
-				</div>
-			</div>
+<div class="flex min-h-[calc(100vh-8rem)] items-center justify-center">
+  <div class="w-full max-w-sm px-4">
+    <Card>
+      <CardHeader class="space-y-1">
+        <CardTitle class="text-center text-2xl">Welcome back</CardTitle>
+        <CardDescription class="text-center">Sign in to your account</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div class="grid gap-6">
+          <form on:submit|preventDefault={handleLogin} class="grid gap-4">
+            <div class="grid gap-2">
+              <Label for="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                bind:value={email}
+                autocomplete="email"
+                placeholder="m@example.com"
+                required
+              />
+            </div>
 
-			{#if error}
-				<div class="rounded-md bg-red-500 p-4 text-sm text-white" role="alert">
-					{error}
-				</div>
-			{/if}
+            <div class="grid gap-2">
+              <Label for="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                bind:value={password}
+                autocomplete="current-password"
+                required
+              />
+            </div>
 
-			<div class="flex items-center justify-between">
-				<div class="text-sm">
-					<a href="/reset-password" class="font-medium text-red-600 hover:text-red-500"
-						>Forgot your password?</a
-					>
-				</div>
-				<div class="text-sm">
-					<a href="/signup" class="font-medium text-red-600 hover:text-red-500">Create an account</a
-					>
-				</div>
-			</div>
+            {#if error}
+              <div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                {error}
+              </div>
+            {/if}
 
-			<div>
-				<button
-					type="submit"
-					disabled={loading}
-					class="group relative flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50"
-				>
-					{#if loading}
-						<span class="absolute inset-y-0 left-0 flex items-center pl-3">
-							<svg
-								class="h-5 w-5 animate-spin text-white"
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-							>
-								<circle
-									class="opacity-25"
-									cx="12"
-									cy="12"
-									r="10"
-									stroke="currentColor"
-									stroke-width="4"
-								/>
-								<path
-									class="opacity-75"
-									fill="currentColor"
-									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-								/>
-							</svg>
-						</span>
-						Signing in...
-					{:else}
-						Sign in
-					{/if}
-				</button>
-			</div>
-		</form>
-	</div>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
+            </Button>
+          </form>
+
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <span class="w-full border-t" />
+            </div>
+            <div class="relative flex justify-center text-xs uppercase">
+              <span class="bg-card px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+
+          <Button variant="outline" class="gap-2" onclick={handleDiscordLogin} disabled={loading}>
+            <DiscordLogo class="size-4" />
+            Discord
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
 </div>

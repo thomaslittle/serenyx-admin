@@ -3,12 +3,12 @@
   import { createEventDispatcher } from 'svelte';
 
   export let currentImageUrl: string | null = null;
-  
+
   const dispatch = createEventDispatcher<{
     upload: { url: string };
     error: { message: string };
   }>();
-  
+
   let uploading = false;
   let error: string | null = null;
   let fileInput: HTMLInputElement;
@@ -48,9 +48,9 @@
       if (uploadError) throw uploadError;
 
       // Get the public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('logos')
-        .getPublicUrl(filePath);
+      const {
+        data: { publicUrl }
+      } = supabase.storage.from('logos').getPublicUrl(filePath);
 
       dispatch('upload', { url: publicUrl });
 
@@ -76,10 +76,8 @@
       if (!pathMatch) return;
 
       const filePath = pathMatch[1];
-      
-      const { error: deleteError } = await supabase.storage
-        .from('logos')
-        .remove([filePath]);
+
+      const { error: deleteError } = await supabase.storage.from('logos').remove([filePath]);
 
       if (deleteError) throw deleteError;
 
@@ -100,12 +98,14 @@
         class="h-20 w-20 flex-shrink-0 rounded-full border-2 border-gray-700 object-cover"
       />
     {:else}
-      <div class="h-20 w-20 flex-shrink-0 rounded-full border-2 border-dashed border-gray-700 bg-gray-800" />
+      <div
+        class="h-20 w-20 flex-shrink-0 rounded-full border-2 border-dashed border-gray-700 bg-neutral-800"
+      />
     {/if}
 
     <div class="flex flex-col space-y-2">
       <label
-        class="inline-flex cursor-pointer items-center rounded-md bg-gray-700 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-600"
+        class="inline-flex cursor-pointer items-center rounded-md bg-neutral-700 px-3 py-2 text-sm font-semibold text-white hover:bg-neutral-600"
       >
         <span>{uploading ? 'Uploading...' : 'Upload Logo'}</span>
         <input
@@ -122,7 +122,7 @@
         <button
           type="button"
           on:click={removeImage}
-          class="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500"
+          class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white"
         >
           Remove Logo
         </button>
@@ -134,7 +134,5 @@
     <p class="text-sm text-red-500">{error}</p>
   {/if}
 
-  <p class="text-xs text-gray-400">
-    Supported formats: JPG, PNG, GIF. Maximum file size: 2MB
-  </p>
+  <p class="text-xs text-gray-400">Supported formats: JPG, PNG, GIF. Maximum file size: 2MB</p>
 </div>

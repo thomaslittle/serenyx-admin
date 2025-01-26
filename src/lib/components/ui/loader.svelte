@@ -1,0 +1,50 @@
+<script>
+  import { onMount } from 'svelte';
+  export let width = '100'; // Default width
+  export let height = '100'; // Default height
+  export let className = ''; // Additional class support
+
+  let paths = {
+    p1: 'M1604.6 1386.3h-365.8l-36.5 207h459l20.3-115.2c8.5-47.9-28.4-91.8-77-91.8zm-6.8 567h-774l-15.1 85.7c-11.1 63.3 37.6 121.3 101.9 121.3h564.5c49.9 0 92.6-35.8 101.2-84.9z',
+    p2: 'm1647.5 1674.3-37 207h-774l30.8-174.7 5.7-32.5 30.7-173.8h-.1l11.6-66c8.7-49.1 51.4-85 101.3-85h147.8l-6.5 37-50.8 288z'
+  };
+</script>
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="807 1349 876 812"
+  {width}
+  {height}
+  class={className}
+>
+  <path d={paths.p1} fill="none" stroke="#ea0e4b" stroke-width="1" opacity="0.2" />
+  <path d={paths.p2} fill="none" stroke="#ea0e4b" stroke-width="1" opacity="0.2" />
+  <path
+    d={paths.p1}
+    fill="none"
+    stroke="#ea0e4b"
+    stroke-width="3"
+    stroke-dasharray="30 30"
+    class="shimmer"
+  />
+  <path
+    d={paths.p2}
+    fill="none"
+    stroke="#ea0e4b"
+    stroke-width="3"
+    stroke-dasharray="30 30"
+    class="shimmer"
+  />
+</svg>
+
+<style>
+  .shimmer {
+    animation: shimmer 1s linear infinite;
+  }
+
+  @keyframes shimmer {
+    to {
+      stroke-dashoffset: -60;
+    }
+  }
+</style>

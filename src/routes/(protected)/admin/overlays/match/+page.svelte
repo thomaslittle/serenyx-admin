@@ -1,25 +1,52 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { supabase } from '$lib/supabase/client';
-  import type { Database } from '$lib/supabase/types';
+  import * as Select from '$lib/components/ui/select/index.js';
+  import * as Form from '$lib/components/ui/form/index.js';
+  import { superForm } from 'sveltekit-superforms';
+  import { zodClient } from 'sveltekit-superforms/adapters';
+  import { toast } from 'svelte-sonner';
+  import type { Match } from '$lib/types/match';
+  import type { PageData } from './$types';
+  import type { FormSchema } from './schema';
+  import { formSchema } from './schema';
 
-  type Match = Database['public']['Tables']['matches']['Row'];
-  
+  export let data: PageData;
+
   let matches: Match[] = [];
   let selectedMatchId: string | null = null;
   let overlayUrl = '';
-  
+
+  type FormType = {
+    matchId: string;
+  };
+
+  const { form, errors, enhance } = superForm<FormType>(data.form, {
+    id: 'match-form',
+    taintedMessage: null,
+    dataType: 'json',
+    validators: zodClient(formSchema),
+    onUpdated: ({ form }) => {
+      if (form.valid) {
+        selectedMatchId = form.data.matchId;
+        generateOverlayUrl();
+      }
+    }
+  });
+
   onMount(async () => {
     // Fetch active matches
     const { data } = await supabase
       .from('matches')
-      .select(`
+      .select(
+        `
         *,
         team1:teams!team1_id(name),
         team2:teams!team2_id(name)
-      `)
+      `
+      )
       .in('status', ['upcoming', 'live']);
-      
+
     if (data) {
       matches = data;
     }
@@ -34,21 +61,21 @@
 
   async function updateMatchScore(teamNumber: 1 | 2, increment: boolean) {
     if (!selectedMatchId) return;
-    
-    const match = matches.find(m => m.id === selectedMatchId);
+
+    const match = matches.find((m) => m.id === selectedMatchId);
     if (!match) return;
-    
+
     const scoreField = teamNumber === 1 ? 'team1_score' : 'team2_score';
     const currentScore = teamNumber === 1 ? match.team1_score : match.team2_score;
     const newScore = increment ? currentScore + 1 : Math.max(0, currentScore - 1);
-    
+
     const { error } = await supabase
       .from('matches')
       .update({ [scoreField]: newScore })
       .eq('id', selectedMatchId);
-      
+
     if (!error) {
-      matches = matches.map(m => {
+      matches = matches.map((m) => {
         if (m.id === selectedMatchId) {
           return { ...m, [scoreField]: newScore };
         }
@@ -57,18 +84,18 @@
     }
   }
 
-  async function updateMatchStatus(status: 'upcoming' | 'live' | 'completed') {
+  async function updateMatchStatus(newStatus: 'upcoming' | 'live' | 'completed') {
     if (!selectedMatchId) return;
 
     const { error } = await supabase
       .from('matches')
-      .update({ status })
+      .update({ status: newStatus })
       .eq('id', selectedMatchId);
 
     if (!error) {
-      matches = matches.map(m => {
+      matches = matches.map((m) => {
         if (m.id === selectedMatchId) {
-          return { ...m, status };
+          return { ...m, status: newStatus };
         }
         return m;
       });
@@ -76,105 +103,125 @@
   }
 </script>
 
-<div class="min-h-screen bg-gray-900 p-8">
+<div class="min-h-screen bg-white p-6 dark:bg-neutral-900">
   <div class="mx-auto max-w-7xl">
-    <h2 class="text-2xl font-bold text-white mb-8">Match Overlay Control</h2>
-    
+    <h2 class="font-heading mb-8 text-2xl font-bold text-neutral-900 dark:text-white">
+      Match Overlay Control
+    </h2>
+
     <!-- Match Selection -->
-    <div class="bg-gray-800 rounded-lg p-6 mb-8">
-      <h3 class="text-lg font-medium text-white mb-4">Select Match</h3>
-      
-      <select
-        bind:value={selectedMatchId}
-        class="w-full bg-gray-700 text-white rounded-md px-4 py-2"
-      >
-        <option value="">Select a match...</option>
-        {#each matches as match}
-          <option value={match.id}>
-            {match.team1.name} vs {match.team2.name} ({match.status})
-          </option>
-        {/each}
-      </select>
-      
-      {#if selectedMatchId}
-        <button
-          on:click={generateOverlayUrl}
-          class="mt-4 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-500"
-        >
-          Generate Overlay URL
-        </button>
-      {/if}
+    <div class="mb-8 rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
+      <h3 class="mb-4 text-lg font-medium text-neutral-900 dark:text-white">Select Match</h3>
+
+      <form method="POST" use:enhance>
+        <div class="space-y-2">
+          <label for="matchId" class="text-sm font-medium text-neutral-900 dark:text-white"
+            >Match</label
+          >
+          <Select.Root
+            type="single"
+            value={$form.matchId}
+            onValueChange={(value) => {
+              $form.matchId = value;
+              selectedMatchId = value;
+              generateOverlayUrl();
+            }}
+          >
+            <Select.Trigger class="w-full">
+              {#if $form.matchId && matches.length}
+                {@const match = matches.find((m) => m.id === $form.matchId)}
+                {#if match}
+                  {match.team1.name} vs {match.team2.name}
+                {:else}
+                  Select a match
+                {/if}
+              {:else}
+                Select a match
+              {/if}
+            </Select.Trigger>
+            <Select.Content>
+              {#each matches as match}
+                <Select.Item value={match.id} class="cursor-pointer">
+                  {match.team1.name} vs {match.team2.name}
+                </Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+          <p class="text-sm text-gray-400">Select a match to control its overlay</p>
+          {#if $errors.matchId}
+            <p class="text-sm text-red-500">{$errors.matchId}</p>
+          {/if}
+        </div>
+      </form>
     </div>
-    
+
     {#if overlayUrl}
       <!-- Overlay URL -->
-      <div class="bg-gray-800 rounded-lg p-6 mb-8">
-        <h3 class="text-lg font-medium text-white mb-4">Overlay URL</h3>
+      <div class="mb-8 rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
+        <h3 class="mb-4 text-lg font-medium dark:text-white">Overlay URL</h3>
         <div class="flex items-center space-x-4">
           <input
             type="text"
             readonly
             value={overlayUrl}
-            class="flex-1 bg-gray-700 text-white rounded-md px-4 py-2"
+            class="flex-1 rounded-md bg-neutral-700 px-4 py-2 text-white"
           />
           <button
             on:click={() => navigator.clipboard.writeText(overlayUrl)}
-            class="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+            class="rounded-md bg-neutral-700 px-4 py-2 text-white hover:bg-neutral-600"
           >
             Copy
           </button>
         </div>
-        <p class="mt-2 text-sm text-gray-400">
-          Use this URL as a Browser Source in OBS
-        </p>
+        <p class="mt-2 text-sm text-gray-400">Use this URL as a Browser Source in OBS</p>
       </div>
     {/if}
-    
+
     {#if selectedMatchId}
       <!-- Match Controls -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
         <!-- Score Controls -->
-        <div class="bg-gray-800 rounded-lg p-6">
-          <h3 class="text-lg font-medium text-white mb-4">Score Controls</h3>
-          
+        <div class="mb-8 rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
+          <h3 class="mb-4 text-lg font-medium dark:text-white">Score Controls</h3>
+
           {#if matches.length}
-            {@const match = matches.find(m => m.id === selectedMatchId)}
+            {@const match = matches.find((m) => m.id === selectedMatchId)}
             {#if match}
               <div class="space-y-6">
                 <!-- Team 1 -->
                 <div>
-                  <h4 class="text-white mb-2">{match.team1.name}</h4>
+                  <h4 class="mb-2 dark:text-white">{match.team1.name}</h4>
                   <div class="flex items-center space-x-4">
                     <button
                       on:click={() => updateMatchScore(1, false)}
-                      class="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                      class="rounded-md bg-neutral-200 px-4 py-2 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
                     >
                       -
                     </button>
-                    <span class="text-white text-xl font-bold">{match.team1_score}</span>
+                    <span class="text-xl font-bold dark:text-white">{match.team1_score}</span>
                     <button
                       on:click={() => updateMatchScore(1, true)}
-                      class="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                      class="rounded-md bg-neutral-200 px-4 py-2 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
                     >
                       +
                     </button>
                   </div>
                 </div>
-                
+
                 <!-- Team 2 -->
                 <div>
-                  <h4 class="text-white mb-2">{match.team2.name}</h4>
+                  <h4 class="mb-2 dark:text-white">{match.team2.name}</h4>
                   <div class="flex items-center space-x-4">
                     <button
                       on:click={() => updateMatchScore(2, false)}
-                      class="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                      class="rounded-md bg-neutral-200 px-4 py-2 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
                     >
                       -
                     </button>
-                    <span class="text-white text-xl font-bold">{match.team2_score}</span>
+                    <span class="text-xl font-bold dark:text-white">{match.team2_score}</span>
                     <button
                       on:click={() => updateMatchScore(2, true)}
-                      class="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                      class="rounded-md bg-neutral-200 px-4 py-2 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
                     >
                       +
                     </button>
@@ -186,16 +233,18 @@
         </div>
 
         <!-- Match Status Controls -->
-        <div class="bg-gray-800 rounded-lg p-6">
-          <h3 class="text-lg font-medium text-white mb-4">Match Status</h3>
-          
+        <div class="mb-8 rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
+          <h3 class="mb-4 text-lg font-medium dark:text-white">Match Status</h3>
+
           <div class="space-y-4">
             {#each ['upcoming', 'live', 'completed'] as status}
-              {@const match = matches.find(m => m.id === selectedMatchId)}
+              {@const match = matches.find((m) => m.id === selectedMatchId)}
               <button
-                on:click={() => updateMatchStatus(status)}
-                class="w-full rounded-md px-4 py-2 text-white
-                  {match?.status === status ? 'bg-red-600 hover:bg-red-500' : 'bg-gray-700 hover:bg-gray-600'}"
+                on:click={() => updateMatchStatus(status as 'upcoming' | 'live' | 'completed')}
+                class="w-full rounded-md px-4 py-2 text-white dark:text-white
+                  {match?.status === status
+                  ? 'bg-primary '
+                  : 'bg-neutral-700 hover:bg-neutral-600'}"
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}
               </button>

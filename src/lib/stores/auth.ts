@@ -1,33 +1,40 @@
 import { writable } from 'svelte/store';
+import type { User } from '@supabase/supabase-js';
 
 interface AuthStore {
-  isLoading: boolean;
-  currentUser: any | null;
-  session: any | null;
-  error: Error | null;
+  user: User | null;
+  role: string | null;
 }
 
-const createAuthStore = () => {
-  const { subscribe, set, update } = writable<AuthStore>({
-    isLoading: true,
-    currentUser: null,
-    session: null,
-    error: null
-  });
+export const auth = writable<AuthStore>({
+  user: null,
+  role: null
+});
 
-  return {
-    subscribe,
-    setSession: (session: any) =>
-      update((state) => ({
-        ...state,
-        session,
-        currentUser: session?.user ?? null,
-        isLoading: false
-      })),
-    setError: (error: Error) =>
-      update((state) => ({ ...state, error, isLoading: false })),
-    reset: () => set({ isLoading: false, currentUser: null, session: null, error: null })
-  };
+export const canAccessAdmin = (role: string | null) => {
+  return role === 'admin';
 };
 
-export const authStore = createAuthStore();
+export const canManageUsers = (role: string | null) => {
+  return role === 'admin';
+};
+
+export const canManageTeams = (role: string | null) => {
+  return role === 'admin';
+};
+
+export const canDeleteItems = (role: string | null) => {
+  return role === 'admin';
+};
+
+export const hasPermission = (role: string | null, permission: string) => {
+  if (!role) return false;
+  
+  // Define permission mappings
+  const rolePermissions: Record<string, string[]> = {
+    admin: ['channels.delete', 'messages.delete'],
+    moderator: ['messages.delete']
+  };
+
+  return rolePermissions[role]?.includes(permission) || false;
+};

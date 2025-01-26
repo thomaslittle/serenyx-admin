@@ -1,239 +1,225 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { supabase } from '$lib/supabase/client';
-	import type { Database } from '$lib/supabase/types';
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { supabase } from '$lib/supabase/client';
+  import type { Database } from '$lib/supabase/types';
+  import * as Form from '$lib/components/ui/form';
+  import * as Select from '$lib/components/ui/select';
+  import { Input } from '$lib/components/ui/input';
+  import { Button } from '$lib/components/ui/button';
+  import { superForm } from 'sveltekit-superforms';
+  import { zodClient } from 'sveltekit-superforms/adapters';
+  import { z } from 'zod';
+  import type { PageData } from './$types';
+  import type { Infer, SuperValidated } from 'sveltekit-superforms';
+  import { formSchema, type FormSchema } from './schema';
 
-	type Team = Database['public']['Tables']['teams']['Row'];
-	type Match = Database['public']['Tables']['matches']['Row'];
+  export let data: { form: SuperValidated<z.infer<typeof formSchema>> };
 
-	let teams: Team[] = [];
-	let match: Partial<Match> = {
-		team1_id: '',
-		team2_id: '',
-		start_time: new Date().toISOString().slice(0, 16),
-		division: '',
-		status: 'upcoming',
-		team1_score: 0,
-		team2_score: 0
-	};
-	let error: string | null = null;
-	let loading = true;
-	let saving = false;
+  type Team = Database['public']['Tables']['teams']['Row'];
+  type Match = Database['public']['Tables']['matches']['Row'];
 
-	onMount(async () => {
-		await fetchTeams();
-	});
+  let teams: Team[] = [];
+  let error: string | null = null;
+  let loading = true;
+  let saving = false;
 
-	async function fetchTeams() {
-		try {
-			loading = true;
-			const { data, error: fetchError } = await supabase
-				.from('teams')
-				.select('*')
-				.order('division')
-				.order('name');
+  const form = superForm(data.form, {
+    taintedMessage: null,
+    validators: zodClient(formSchema),
+    onSubmit: () => {
+      saving = true;
+      return async () => {
+        saving = false;
+      };
+    },
+    onResult: ({ result }) => {
+      console.log('Form result:', result);
+      if (result.type === 'success') {
+        goto('/admin/matches');
+      } else if (result.type === 'error') {
+        error = result.error?.message ?? 'An error occurred';
+        console.error('Form error:', result.error);
+      }
+    }
+  });
 
-			if (fetchError) throw fetchError;
-			teams = data;
-		} catch (e) {
-			error = e.message;
-		} finally {
-			loading = false;
-		}
-	}
+  const { form: formData, errors: formErrors, enhance: formEnhance } = form;
 
-	async function createMatch() {
-		try {
-			saving = true;
-			const { data, error: createError } = await supabase
-				.from('matches')
-				.insert([match])
-				.select()
-				.single();
+  onMount(async () => {
+    await fetchTeams();
+  });
 
-			if (createError) throw createError;
-			goto('/admin/matches');
-		} catch (e) {
-			error = e.message;
-		} finally {
-			saving = false;
-		}
-	}
+  async function fetchTeams() {
+    try {
+      loading = true;
+      const { data, error: fetchError } = await supabase
+        .from('teams')
+        .select('*')
+        .order('division')
+        .order('name');
 
-	$: teamsByDivision = teams.reduce(
-		(acc, team) => {
-			if (!acc[team.division]) {
-				acc[team.division] = [];
-			}
-			acc[team.division].push(team);
-			return acc;
-		},
-		{} as Record<string, Team[]>
-	);
+      if (fetchError) throw fetchError;
+      teams = data;
+    } catch (e: unknown) {
+      error = e instanceof Error ? e.message : 'An error occurred';
+    } finally {
+      loading = false;
+    }
+  }
 
-	$: divisions = [...new Set(teams.map((team) => team.division))].sort();
+  $: teamsByDivision = teams.reduce(
+    (acc, team) => {
+      if (!acc[team.division]) {
+        acc[team.division] = [];
+      }
+      acc[team.division].push(team);
+      return acc;
+    },
+    {} as Record<string, Team[]>
+  );
 
-	$: if (match.team1_id && match.team2_id) {
-		const team1 = teams.find((t) => t.id === match.team1_id);
-		const team2 = teams.find((t) => t.id === match.team2_id);
-		if (team1 && team2 && team1.division === team2.division) {
-			match.division = team1.division;
-		}
-	}
+  $: divisions = [...new Set(teams.map((team) => team.division))].sort();
+
+  $: if ($formData.team1_id && $formData.team2_id) {
+    const team1 = teams.find((t) => t.id === $formData.team1_id);
+    const team2 = teams.find((t) => t.id === $formData.team2_id);
+    if (team1 && team2 && team1.division === team2.division) {
+      $formData.division = team1.division;
+    }
+  }
 </script>
 
-<div class="min-h-screen bg-gray-900 p-8">
-	<div class="mx-auto max-w-3xl">
-		<div class="md:flex md:items-center md:justify-between">
-			<div class="min-w-0 flex-1">
-				<h2 class="text-2xl font-bold uppercase tracking-widest text-white sm:text-3xl">
-					New Match
-				</h2>
-			</div>
-			<div class="mt-4 flex md:ml-4 md:mt-0">
-				<a
-					href="/admin/matches"
-					class="inline-flex items-center rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-500"
-				>
-					Cancel
-				</a>
-			</div>
-		</div>
+<div class="container mx-auto p-4">
+  <h1 class="mb-6 text-2xl font-bold">Create New Match</h1>
 
-		{#if error}
-			<div class="mt-4 rounded-md bg-red-500 p-4">
-				<p class="text-sm text-white">{error}</p>
-			</div>
-		{/if}
+  <form method="POST" use:formEnhance class="max-w-2xl space-y-6">
+    {#if error}
+      <div
+        class="relative rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700"
+        role="alert"
+      >
+        <span class="block sm:inline">{error}</span>
+      </div>
+    {/if}
 
-		{#if loading}
-			<div class="mt-8 text-white">Loading teams...</div>
-		{:else}
-			<form on:submit|preventDefault={createMatch} class="mt-8 space-y-6">
-				<div>
-					<label for="team1" class="block text-sm font-medium text-white">Team 1</label>
-					<select
-						id="team1"
-						bind:value={match.team1_id}
-						required
-						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-					>
-						<option value="">Select a team</option>
-						{#each divisions as division}
-							<optgroup label={division}>
-								{#each teamsByDivision[division] as team}
-									<option value={team.id} disabled={team.id === match.team2_id}>
-										{team.name}
-									</option>
-								{/each}
-							</optgroup>
-						{/each}
-					</select>
-				</div>
+    {#if $formErrors}
+      <div
+        class="relative rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700"
+        role="alert"
+      >
+        <span class="block sm:inline">Form has errors. Please check all fields.</span>
+      </div>
+    {/if}
 
-				<div>
-					<label for="team2" class="block text-sm font-medium text-white">Team 2</label>
-					<select
-						id="team2"
-						bind:value={match.team2_id}
-						required
-						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-					>
-						<option value="">Select a team</option>
-						{#each divisions as division}
-							<optgroup label={division}>
-								{#each teamsByDivision[division] as team}
-									<option value={team.id} disabled={team.id === match.team1_id}>
-										{team.name}
-									</option>
-								{/each}
-							</optgroup>
-						{/each}
-					</select>
-				</div>
+    <Form.Field {form} name="team1_id">
+      <Form.Control let:props>
+        {#snippet children({ props })}
+          <Form.Label>Team 1</Form.Label>
+          <Select.Root type="single" bind:value={$formData.team1_id} {...props}>
+            <Select.Trigger class="w-full">
+              {$formData.team1_id
+                ? teams.find((t) => t.id === $formData.team1_id)?.name
+                : 'Select team 1'}
+            </Select.Trigger>
+            <Select.Content>
+              {#each teams as team}
+                <Select.Item value={team.id}>{team.name}</Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
 
-				<div>
-					<label for="start_time" class="block text-sm font-medium text-white">Start Time</label>
-					<input
-						type="datetime-local"
-						id="start_time"
-						bind:value={match.start_time}
-						required
-						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-					/>
-				</div>
+    <Form.Field {form} name="team2_id">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Team 2</Form.Label>
+          <Select.Root type="single" bind:value={$formData.team2_id} name={props.name}>
+            <Select.Trigger {...props}>
+              {$formData.team2_id
+                ? teams.find((t) => t.id === $formData.team2_id)?.name
+                : 'Select team 2'}
+            </Select.Trigger>
+            <Select.Content>
+              {#each teams as team}
+                <Select.Item value={team.id} label={team.name} />
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
 
-				<div>
-					<label for="division" class="block text-sm font-medium text-white">Division</label>
-					<input
-						type="text"
-						id="division"
-						bind:value={match.division}
-						required
-						readonly={match.team1_id && match.team2_id}
-						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm {match.team1_id &&
-						match.team2_id
-							? 'opacity-50'
-							: ''}"
-					/>
-					{#if match.team1_id && match.team2_id}
-						<p class="mt-1 text-sm text-gray-400">Division is set based on selected teams</p>
-					{/if}
-				</div>
+    <Form.Field {form} name="start_time">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Start Time</Form.Label>
+          <Input type="datetime-local" bind:value={$formData.start_time} {...props} />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
 
-				<div class="grid grid-cols-2 gap-4">
-					<div>
-						<label for="team1_score" class="block text-sm font-medium text-white"
-							>Team 1 Score</label
-						>
-						<input
-							type="number"
-							id="team1_score"
-							bind:value={match.team1_score}
-							min="0"
-							class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-						/>
-					</div>
+    <Form.Field {form} name="division">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Division</Form.Label>
+          <Input type="text" bind:value={$formData.division} {...props} />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
 
-					<div>
-						<label for="team2_score" class="block text-sm font-medium text-white"
-							>Team 2 Score</label
-						>
-						<input
-							type="number"
-							id="team2_score"
-							bind:value={match.team2_score}
-							min="0"
-							class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-						/>
-					</div>
-				</div>
+    <Form.Field {form} name="status">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Status</Form.Label>
+          <Select.Root type="single" bind:value={$formData.status} name={props.name}>
+            <Select.Trigger {...props}>
+              {$formData.status
+                ? $formData.status.charAt(0).toUpperCase() + $formData.status.slice(1)
+                : 'Select status'}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="upcoming" label="Upcoming" />
+              <Select.Item value="live" label="Live" />
+              <Select.Item value="completed" label="Completed" />
+            </Select.Content>
+          </Select.Root>
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
 
-				<div>
-					<label for="status" class="block text-sm font-medium text-white">Status</label>
-					<select
-						id="status"
-						bind:value={match.status}
-						required
-						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-					>
-						<option value="upcoming">Upcoming</option>
-						<option value="live">Live</option>
-						<option value="completed">Completed</option>
-					</select>
-				</div>
+    <Form.Field {form} name="team1_score">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Team 1 Score</Form.Label>
+          <Input type="number" bind:value={$formData.team1_score} {...props} />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
 
-				<div>
-					<button
-						type="submit"
-						disabled={saving}
-						class="w-full rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50"
-					>
-						{saving ? 'Creating...' : 'Create Match'}
-					</button>
-				</div>
-			</form>
-		{/if}
-	</div>
+    <Form.Field {form} name="team2_score">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Team 2 Score</Form.Label>
+          <Input type="number" bind:value={$formData.team2_score} {...props} />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+
+    <div class="flex justify-end gap-4">
+      <Button variant="outline" onclick={() => goto('/admin/matches')}>Cancel</Button>
+      <Button type="submit" disabled={saving} data-saving={saving}>
+        {saving ? 'Creating...' : 'Create Match'}
+      </Button>
+    </div>
+  </form>
 </div>

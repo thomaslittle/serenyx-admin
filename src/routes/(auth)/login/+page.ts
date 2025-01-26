@@ -1,13 +1,12 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async (event) => {
-  const { supabase } = await event.parent();
-  const { data: { session } } = await supabase.auth.getSession();
-  
+export const load: PageLoad = async ({ parent }) => {
+  const { session } = await parent();
+
+  // If user is already logged in, redirect them
   if (session) {
-    throw redirect(303, '/admin');
+    const role = session.user.app_metadata.role || 'authenticated';
+    throw redirect(303, role === 'admin' ? '/admin' : '/');
   }
-  
-  return {};
 };

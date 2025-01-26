@@ -5,7 +5,7 @@
   import Star from 'lucide-svelte/icons/star';
   import { divisions } from '$lib/stores/tournament';
   import { fetchDivisionStandings, subscribeToTournamentUpdates } from '$lib/stores/tournament';
-  
+
   export let divisionName: string;
   export let autoExpand = false;
   export let autoExpandInterval = 0;
@@ -14,12 +14,12 @@
   let cleanup: () => void;
   let autoExpandTimer: NodeJS.Timeout;
 
-  $: currentDivision = $divisions.find(d => d.name === divisionName);
+  $: currentDivision = $divisions.find((d) => d.name === divisionName);
 
   onMount(async () => {
     // Initial data fetch
     await fetchDivisionStandings();
-    
+
     // Set up real-time subscription
     cleanup = subscribeToTournamentUpdates();
 
@@ -39,23 +39,23 @@
 
 <div class="w-96 bg-black bg-opacity-90">
   <!-- Header -->
-  <div 
-    class="flex cursor-pointer items-center justify-between bg-red-600 p-4"
-    on:click={() => expanded = !expanded}
+  <div
+    class="flex cursor-pointer items-center justify-between bg-primary p-4"
+    on:click={() => (expanded = !expanded)}
   >
     <div class="flex items-center space-x-2">
-      <Trophy class="text-white h-5 w-5" />
-      <h2 class="text-xl font-bold tracking-wider text-white">{divisionName}</h2>
+      <Trophy class="h-5 w-5 text-white" />
+      <h2 class="font-heading text-xl font-bold tracking-wider text-white">{divisionName}</h2>
     </div>
-    <ChevronRight 
-      class="text-white h-6 w-6 transition-transform duration-300"
+    <ChevronRight
+      class="h-6 w-6 text-white transition-transform duration-300"
       style="transform: rotate({expanded ? '90deg' : '0deg'})"
     />
   </div>
 
   <!-- Standings table -->
-  <div 
-    class="overflow-hidden transition-all duration-300" 
+  <div
+    class="overflow-hidden transition-all duration-300"
     style="max-height: {expanded ? '24rem' : '0'}"
   >
     {#if currentDivision}
@@ -74,7 +74,7 @@
               <tr class="text-white {index === 0 ? 'font-bold' : ''}">
                 <td class="flex items-center space-x-2 py-2">
                   {#if index === 0}
-                    <Star class="h-4 w-4 text-red-600" />
+                    <Star class="h-4 w-4 text-primary" />
                   {/if}
                   <span>{team.name}</span>
                 </td>
@@ -87,9 +87,7 @@
         </table>
       </div>
     {:else}
-      <div class="p-4 text-gray-400">
-        No standings data available
-      </div>
+      <div class="p-4 text-gray-400">No standings data available</div>
     {/if}
   </div>
 </div>
