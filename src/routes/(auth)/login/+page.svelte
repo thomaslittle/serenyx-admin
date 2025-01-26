@@ -5,7 +5,15 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import { Label } from '$lib/components/ui/label/index.js';
-  import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
+  import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription
+  } from '$lib/components/ui/card/index.js';
+  import { Separator } from '$lib/components/ui/separator/index.js';
+  import DiscordLogo from 'virtual:icons/logos/discord-icon';
 
   let email = '';
   let password = '';
@@ -14,138 +22,137 @@
 
   async function handleLogin() {
     try {
-      console.log('Starting login process...');
       loading = true;
       error = null;
 
-      console.log('Attempting sign in with:', { email });
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        throw signInError;
-      }
-
-      console.log('Sign in successful:', data);
+      if (signInError) throw signInError;
 
       if (data.session) {
         const { user } = data.session;
-        console.log('User from session:', user);
 
         // Get role from database
-        console.log('Fetching role from database for user:', user.id);
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        console.log('Role query result:', { roleData, roleError });
-
-        if (roleError) {
-          console.error('Error fetching role:', roleError);
-          console.log('User ID:', user.id);
-
-          // Try to get all roles for debugging
-          console.log('Attempting to fetch all roles...');
-          const { data: allRoles, error: allRolesError } = await supabase
-            .from('user_roles')
-            .select('*');
-
-          console.log('All roles query result:', { allRoles, allRolesError });
-        }
+        if (roleError) throw roleError;
 
         // Check both user_roles table and app_metadata
         const dbRole = roleData?.role;
         const metadataRole = user.app_metadata?.role;
-        console.log('Roles found:', { dbRole, metadataRole, rawMetadata: user.app_metadata });
 
-        // If user has admin in metadata but not in db, sync it using the RPC function
+        // If user has admin in metadata but not in db, sync it
         if (metadataRole === 'admin' && !dbRole) {
-          console.log('Attempting to sync admin role using RPC...');
-          const { data: rpcData, error: syncError } = await supabase.rpc('set_role', {
+          const { error: syncError } = await supabase.rpc('set_role', {
             input_user_id: user.id,
             input_role: 'admin'
           });
 
-          console.log('RPC result:', { rpcData, syncError });
-
-          if (syncError) {
-            console.error('Error syncing role:', syncError);
-          } else {
-            console.log('Successfully synced admin role');
-
-            // Fetch the updated role
-            console.log('Fetching updated role...');
-            const { data: updatedRole, error: fetchError } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', user.id)
-              .maybeSingle();
-
-            console.log('Updated role query result:', { updatedRole, fetchError });
-          }
+          if (syncError) throw syncError;
         }
 
         // Use metadata role if available, otherwise use db role or default to authenticated
         const role = metadataRole || dbRole || 'authenticated';
 
         // Update auth store
-        auth.set({
-          user,
-          role
-        });
+        auth.set({ user, role });
 
-        // Force a full page reload to ensure session is properly initialized
-        console.log('Redirecting to:', role === 'admin' ? '/admin' : '/');
+        // Redirect based on role
         window.location.href = role === 'admin' ? '/admin' : '/';
       }
     } catch (e) {
-      console.error('Login error:', e);
       error = (e as AuthError).message;
     } finally {
       loading = false;
     }
   }
+
+  async function handleDiscordLogin() {
+    try {
+      loading = true;
+      error = null;
+
+      const { data, error: signInError } = await supabase.auth.signInWithOAuth({
+        provider: 'discord',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'identify email'
+        }
+      });
+
+      if (signInError) throw signInError;
+    } catch (e) {
+      error = (e as AuthError).message;
+      loading = false;
+    }
+  }
 </script>
 
-<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
-  <div class="mx-auto max-w-md">
+<div class="flex min-h-[calc(100vh-8rem)] items-center justify-center">
+  <div class="w-full max-w-sm px-4">
     <Card>
-      <CardHeader>
-        <CardTitle class="text-2xl font-bold">Login</CardTitle>
+      <CardHeader class="space-y-1">
+        <CardTitle class="text-center text-2xl">Welcome back</CardTitle>
+        <CardDescription class="text-center">Sign in to your account</CardDescription>
       </CardHeader>
       <CardContent>
-        <form on:submit|preventDefault={handleLogin} class="space-y-4">
-          <div class="space-y-2">
-            <Label for="email">Email</Label>
-            <Input type="email" id="email" bind:value={email} autocomplete="email" required />
-          </div>
-
-          <div class="space-y-2">
-            <Label for="password">Password</Label>
-            <Input
-              type="password"
-              id="password"
-              bind:value={password}
-              autocomplete="current-password"
-              required
-            />
-          </div>
-
-          {#if error}
-            <div class="rounded-md bg-red-500 p-3 text-sm text-white">
-              {error}
+        <div class="grid gap-6">
+          <form on:submit|preventDefault={handleLogin} class="grid gap-4">
+            <div class="grid gap-2">
+              <Label for="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                bind:value={email}
+                autocomplete="email"
+                placeholder="m@example.com"
+                required
+              />
             </div>
-          {/if}
 
-          <Button type="submit" class="w-full" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+            <div class="grid gap-2">
+              <Label for="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                bind:value={password}
+                autocomplete="current-password"
+                required
+              />
+            </div>
+
+            {#if error}
+              <div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                {error}
+              </div>
+            {/if}
+
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
+            </Button>
+          </form>
+
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <span class="w-full border-t" />
+            </div>
+            <div class="relative flex justify-center text-xs uppercase">
+              <span class="bg-card px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+
+          <Button variant="outline" class="gap-2" onclick={handleDiscordLogin} disabled={loading}>
+            <DiscordLogo class="size-4" />
+            Discord
           </Button>
-        </form>
+        </div>
       </CardContent>
     </Card>
   </div>

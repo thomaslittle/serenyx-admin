@@ -100,7 +100,7 @@
   }
 </script>
 
-<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
+<div class="min-h-screen bg-white p-6 dark:bg-neutral-900">
   <div class="mx-auto max-w-3xl">
     <div class="md:flex md:items-center md:justify-between">
       <div class="min-w-0 flex-1">

@@ -2,23 +2,35 @@
 <script lang="ts">
   import { supabase } from '$lib/supabase/client';
   import type { PageData } from './$types';
+  import ChevronDown from 'lucide-svelte/icons/chevron-down';
   import {
     type ColumnDef,
     type ColumnFiltersState,
     type PaginationState,
+    type RowSelectionState,
     type SortingState,
+    type VisibilityState,
     getCoreRowModel,
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel
   } from '@tanstack/table-core';
-  import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
+  import { createRawSnippet } from 'svelte';
+  import DataTableCheckbox from '$lib/components/ui/data-table/data-table-checkbox.svelte';
+  import DataTableEmailButton from '$lib/components/ui/data-table/data-table-email-button.svelte';
+  import DataTableActions from '$lib/components/ui/data-table/data-table-actions.svelte';
   import * as Table from '$lib/components/ui/table/index.js';
-  import { Input } from '$lib/components/ui/input/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-  import ChevronDown from 'lucide-svelte/icons/chevron-down';
-  import { columns } from './(components)/columns';
+  import { Input } from '$lib/components/ui/input/index.js';
+  import MoreHorizontal from 'lucide-svelte/icons/more-horizontal';
+  import {
+    FlexRender,
+    createSvelteTable,
+    renderComponent,
+    renderSnippet
+  } from '$lib/components/ui/data-table/index.js';
+  import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 
   const { data } = $props<{ data: PageData }>();
 
@@ -33,10 +45,113 @@
   let roles = data.availableRoles || [];
   let loading = $state(false);
   let error = $state<string | null>(null);
+  let showDeleteConfirm = $state(false);
+
+  async function handleDeleteUser(userId: string) {
+    try {
+      // First try to delete from auth.users directly
+      const { error: deleteError } = await supabase.rpc('delete_user', {
+        input_user_id: userId
+      });
+
+      if (deleteError) {
+        // Fallback to direct deletion if RPC fails
+        const { error: directDeleteError } = await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', userId);
+
+        if (directDeleteError) throw directDeleteError;
+      }
+
+      // Update local state after successful deletion
+      users = users.filter((user) => user.id !== userId);
+    } catch (e: any) {
+      error = e.message;
+    }
+  }
+
+  const columns: ColumnDef<User>[] = [
+    {
+      id: 'select',
+      header: ({ table }) =>
+        renderComponent(DataTableCheckbox, {
+          checked: table.getIsAllPageRowsSelected(),
+          indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
+          onCheckedChange: (value) => table.toggleAllPageRowsSelected(!!value),
+          'aria-label': 'Select all'
+        }),
+      cell: ({ row }) =>
+        renderComponent(DataTableCheckbox, {
+          checked: row.getIsSelected(),
+          onCheckedChange: (value) => row.toggleSelected(!!value),
+          'aria-label': 'Select row'
+        }),
+      enableSorting: false,
+      enableHiding: false
+    },
+    {
+      accessorKey: 'email',
+      header: ({ column }) =>
+        renderComponent(DataTableEmailButton, {
+          onclick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+        }),
+      cell: ({ row }) => {
+        const emailSnippet = createRawSnippet<[string]>((getEmail) => {
+          const email = getEmail();
+          return {
+            render: () => `<div class="lowercase">${email}</div>`
+          };
+        });
+        return renderSnippet(emailSnippet, row.getValue('email'));
+      }
+    },
+    {
+      accessorKey: 'role',
+      header: 'Role',
+      cell: ({ row }) => {
+        const roleSnippet = createRawSnippet<[string]>((getRole) => {
+          const role = getRole();
+          return {
+            render: () => `<div class="capitalize">${role}</div>`
+          };
+        });
+        return renderSnippet(roleSnippet, row.getValue('role'));
+      }
+    },
+    {
+      accessorKey: 'last_sign_in_at',
+      header: 'Last Sign In',
+      cell: ({ row }) => {
+        const dateSnippet = createRawSnippet<[string]>((getDate) => {
+          const date = new Date(getDate()).toLocaleString();
+          return {
+            render: () => `<div>${date}</div>`
+          };
+        });
+        return renderSnippet(dateSnippet, row.getValue('last_sign_in_at'));
+      }
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        const user = row.original;
+        return renderComponent(DataTableActions, {
+          id: user.id,
+          roles,
+          currentRole: user.role,
+          onRoleChange: updateUserRole,
+          onDelete: handleDeleteUser
+        });
+      }
+    }
+  ];
 
   let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
   let sorting = $state<SortingState>([]);
   let columnFilters = $state<ColumnFiltersState>([]);
+  let rowSelection = $state<RowSelectionState>({});
+  let columnVisibility = $state<VisibilityState>({});
 
   const table = createSvelteTable({
     get data() {
@@ -50,23 +165,55 @@
       get sorting() {
         return sorting;
       },
+      get columnVisibility() {
+        return columnVisibility;
+      },
+      get rowSelection() {
+        return rowSelection;
+      },
       get columnFilters() {
         return columnFilters;
       }
     },
-    onPaginationChange: (updater) => {
-      pagination = typeof updater === 'function' ? updater(pagination) : updater;
-    },
-    onSortingChange: (updater) => {
-      sorting = typeof updater === 'function' ? updater(sorting) : updater;
-    },
-    onColumnFiltersChange: (updater) => {
-      columnFilters = typeof updater === 'function' ? updater(columnFilters) : updater;
-    },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel()
+    getFilteredRowModel: getFilteredRowModel(),
+    onPaginationChange: (updater) => {
+      if (typeof updater === 'function') {
+        pagination = updater(pagination);
+      } else {
+        pagination = updater;
+      }
+    },
+    onSortingChange: (updater) => {
+      if (typeof updater === 'function') {
+        sorting = updater(sorting);
+      } else {
+        sorting = updater;
+      }
+    },
+    onColumnFiltersChange: (updater) => {
+      if (typeof updater === 'function') {
+        columnFilters = updater(columnFilters);
+      } else {
+        columnFilters = updater;
+      }
+    },
+    onColumnVisibilityChange: (updater) => {
+      if (typeof updater === 'function') {
+        columnVisibility = updater(columnVisibility);
+      } else {
+        columnVisibility = updater;
+      }
+    },
+    onRowSelectionChange: (updater) => {
+      if (typeof updater === 'function') {
+        rowSelection = updater(rowSelection);
+      } else {
+        rowSelection = updater;
+      }
+    }
   });
 
   async function updateUserRole(userId: string, newRole: string) {
@@ -85,19 +232,28 @@
   }
 
   async function handleBulkDelete() {
-    const selectedIds = table.getFilteredSelectedRowModel().rows.map((row) => row.original.id);
-    try {
-      const { error: deleteError } = await supabase.from('users').delete().in('id', selectedIds);
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+    showDeleteConfirm = true;
+  }
 
-      if (deleteError) throw deleteError;
-      users = users.filter((user) => !selectedIds.includes(user.id));
+  async function confirmBulkDelete() {
+    try {
+      loading = true;
+      const selectedRows = table.getFilteredSelectedRowModel().rows;
+      for (const row of selectedRows) {
+        await handleDeleteUser(row.original.id);
+      }
+      showDeleteConfirm = false;
+      rowSelection = {};
     } catch (e: any) {
       error = e.message;
+    } finally {
+      loading = false;
     }
   }
 </script>
 
-<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
+<div class="min-h-screen bg-white p-6 dark:bg-neutral-900">
   <div class="mx-auto max-w-7xl">
     <div class="md:flex md:items-center md:justify-between">
       <div class="min-w-0 flex-1">
@@ -123,7 +279,7 @@
             <path d="M11 3c7 0 7 3 7 3s0 3-7 3s-7-3-7-3s0-3 7-3m0 18c-7 0-7-3-7-3v-6" />
           </g>
         </svg>
-        <p class="text-sm capitalize leading-none text-neutral-900 dark:text-white">{error}</p>
+        <p class="text-sm leading-none text-neutral-900 dark:text-white">{error}</p>
       </div>
     {/if}
 
@@ -134,29 +290,65 @@
         <p class="text-neutral-500 dark:text-neutral-400">No users found.</p>
       </div>
     {:else}
-      <div class="mt-8">
-        <div class="flex items-center py-4">
-          <Input
-            placeholder="Filter emails..."
-            value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
-            on:input={(e) => table.getColumn('email')?.setFilterValue(e.currentTarget.value)}
-            class="max-w-sm"
-          />
-          {#if table.getFilteredSelectedRowModel().rows.length > 0}
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger>
-                <Button variant="outline" class="ml-2">
-                  Actions <ChevronDown class="ml-2 size-4" />
-                </Button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Content align="end">
-                <DropdownMenu.Item on:click={handleBulkDelete}>Delete Selected</DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Root>
-          {/if}
+      <div>
+        <div class="flex items-center justify-between space-x-4 py-4">
+          <div class="flex w-full items-center">
+            <Input
+              placeholder="Filter emails..."
+              value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
+              oninput={(e) => table.getColumn('email')?.setFilterValue(e.currentTarget.value)}
+              onchange={(e) => {
+                table.getColumn('email')?.setFilterValue(e.currentTarget.value);
+              }}
+              class=""
+            />
+            {#if table.getFilteredSelectedRowModel().rows.length > 0}
+              <AlertDialog.Root bind:open={showDeleteConfirm}>
+                <AlertDialog.Trigger>
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger>
+                      <Button variant="outline">
+                        Actions <ChevronDown class="ml-2 size-4" />
+                      </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content align="end">
+                      <DropdownMenu.Item onclick={handleBulkDelete}
+                        >Delete Selected</DropdownMenu.Item
+                      >
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Root>
+                </AlertDialog.Trigger>
+
+                <AlertDialog.Portal>
+                  <AlertDialog.Content>
+                    <AlertDialog.Header>
+                      <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+                      <AlertDialog.Description>
+                        This action cannot be undone. This will permanently delete the following
+                        user accounts:
+                      </AlertDialog.Description>
+                    </AlertDialog.Header>
+                    <div class="max-h-[200px] overflow-y-auto py-4">
+                      <ul class="list-inside list-disc space-y-2">
+                        {#each table.getFilteredSelectedRowModel().rows as row}
+                          <li>{row.original.email}</li>
+                        {/each}
+                      </ul>
+                    </div>
+                    <AlertDialog.Footer>
+                      <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+                      <AlertDialog.Action onclick={confirmBulkDelete}
+                        >Delete Users</AlertDialog.Action
+                      >
+                    </AlertDialog.Footer>
+                  </AlertDialog.Content>
+                </AlertDialog.Portal>
+              </AlertDialog.Root>
+            {/if}
+          </div>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
-              <Button variant="outline" class="ml-auto">
+              <Button variant="outline">
                 Columns <ChevronDown class="ml-2 size-4" />
               </Button>
             </DropdownMenu.Trigger>
@@ -165,7 +357,7 @@
                 <DropdownMenu.CheckboxItem
                   class="capitalize"
                   checked={column.getIsVisible()}
-                  on:click={() => column.toggleVisibility()}
+                  onCheckedChange={(checked) => column.toggleVisibility(!!checked)}
                 >
                   {column.id}
                 </DropdownMenu.CheckboxItem>
@@ -173,8 +365,7 @@
             </DropdownMenu.Content>
           </DropdownMenu.Root>
         </div>
-
-        <div class="overflow-hidden rounded-lg bg-neutral-100 shadow dark:bg-neutral-800">
+        <div class="rounded-md border">
           <Table.Root>
             <Table.Header>
               {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
@@ -214,17 +405,16 @@
             </Table.Body>
           </Table.Root>
         </div>
-
-        <div class="flex items-center justify-end space-x-2 py-4">
+        <div class="flex items-center justify-end space-x-2 pt-4">
           <div class="flex-1 text-sm text-muted-foreground">
             {table.getFilteredSelectedRowModel().rows.length} of
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
-          <div class="flex items-center space-x-2">
+          <div class="space-x-2">
             <Button
               variant="outline"
               size="sm"
-              on:click={() => table.previousPage()}
+              onclick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
               Previous
@@ -232,20 +422,11 @@
             <Button
               variant="outline"
               size="sm"
-              on:click={() => table.nextPage()}
+              onclick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
               Next
             </Button>
-            <select
-              value={table.getState().pagination.pageSize}
-              on:change={(e) => table.setPageSize(Number(e.currentTarget.value))}
-              class="rounded-md border p-1 text-sm"
-            >
-              {#each [10, 20, 30, 40, 50] as size}
-                <option value={size}>Show {size}</option>
-              {/each}
-            </select>
           </div>
         </div>
       </div>

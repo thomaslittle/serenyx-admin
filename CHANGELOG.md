@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added bulk user deletion functionality
 - Added email filtering and column visibility controls
 - Implemented pagination for user lists
+- Added Discord OAuth integration with proper callback handling
+- Added match management system with RLS policies
+- Implemented proper OAuth callback route for social logins
 
 ### Changed
 
@@ -35,6 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored admin user management to use shadcn-svelte components
 - Improved user interface with modern table features
 - Enhanced user role editing with dropdown selection
+- Updated RLS policies to check both app_metadata and user_roles table
+- Improved OAuth flow with better error handling and role synchronization
 
 ### Fixed
 
@@ -46,6 +51,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User table rendering and state management
 - Role selection and update functionality
 - Table pagination and filtering issues
+- Discord OAuth callback routing issues
+- RLS policy checks for admin operations
+- Match creation permissions for admin users
 
 ### Security
 
@@ -54,6 +62,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced permission checking system
 - Improved role assignment security
 - Added role-based policy controls
+- Enhanced RLS policies with dual role verification
+- Secured OAuth callback routes
+- Added proper scopes for Discord OAuth
 
 ### Technical Debt
 
@@ -61,6 +72,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved role type safety
 - Enhanced permission checking
 - Standardized role verification
+- Refactored RLS policies for better maintainability
+- Streamlined OAuth integration
 
 ### Development Experience
 
@@ -71,3 +84,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Separated table components for better maintainability
 - Added type safety for user management interfaces
 - Improved component organization following shadcn patterns
+- Enhanced OAuth configuration documentation
+- Added clear error messages for permission issues

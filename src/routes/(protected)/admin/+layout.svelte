@@ -5,14 +5,20 @@
   import { onMount } from 'svelte';
   import Footer from '$lib/components/Footer.svelte';
   import BackgroundImage from '$lib/components/BackgroundImage.svelte';
+  import Home from 'lucide-svelte/icons/home';
+  import Users from 'lucide-svelte/icons/users';
+  import Box from 'lucide-svelte/icons/box';
+  import Settings from 'lucide-svelte/icons/settings';
 
   let isMenuOpen = false;
 
   const navigationItems = [
-    { href: '/admin', label: 'Dashboard' },
-    { href: '/admin/matches', label: 'Matches' },
-    { href: '/admin/teams', label: 'Teams' },
-    { href: '/admin/overlays', label: 'Overlays' }
+    { href: '/admin', label: 'Dashboard', icon: Home },
+    { href: '/admin/users', label: 'Users', icon: Users },
+    { href: '/admin/matches', label: 'Matches', icon: Home },
+    { href: '/admin/teams', label: 'Teams', icon: Users },
+    { href: '/admin/overlays', label: 'Overlays', icon: Box },
+    { href: '/admin/sandbox', label: 'Sandbox', icon: Box }
   ];
 
   async function handleSignOut() {
@@ -29,8 +35,9 @@
   }
 
   onMount(() => {
-    // Initialize theme class on mount
-    document.documentElement.classList.toggle('dark', $theme === 'dark');
+    // Always initialize with dark theme
+    document.documentElement.classList.add('dark');
+    $theme = 'dark';
   });
 </script>
 
@@ -38,10 +45,27 @@
 
 <div class="relative min-h-screen">
   <nav
-    class="border-b border-neutral-200 bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-800 sm:px-8"
+    class="border-b border-neutral-200 bg-neutral-100 px-6 dark:border-neutral-800 dark:bg-neutral-800"
   >
     <div class="mx-auto max-w-7xl">
       <div class="flex h-16 items-center justify-between">
+        <a href="/">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            version="1.2"
+            viewBox="807 1349 876 812"
+            class="size-7 fill-primary text-white"
+          >
+            <path
+              d="M1604.6 1386.3h-365.8l-36.5 207h459l20.3-115.2c8.5-47.9-28.4-91.8-77-91.8zm-6.8 567h-774l-15.1 85.7c-11.1 63.3 37.6 121.3 101.9 121.3h564.5c49.9 0 92.6-35.8 101.2-84.9z"
+              class="s0"
+            />
+            <path
+              d="m1647.5 1674.3-37 207h-774l30.8-174.7 5.7-32.5 30.7-173.8h-.1l11.6-66c8.7-49.1 51.4-85 101.3-85h147.8l-6.5 37-50.8 288z"
+              class="s0"
+            />
+          </svg>
+        </a>
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <span class="text-xl font-bold text-white"></span>
@@ -140,7 +164,7 @@
           <button
             type="button"
             onclick={toggleMenu}
-            class="mr-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-neutral-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+            class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-neutral-700 hover:text-white focus:outline-none"
           >
             <span class="sr-only">Open main menu</span>
             <!-- Menu icon -->
@@ -182,13 +206,13 @@
 
     <!-- Mobile menu -->
     <div class={isMenuOpen ? 'md:hidden' : 'hidden'}>
-      <div class="space-y-1 px-2 pb-3 pt-2 sm:px-3">
+      <div class="space-y-1 pb-3 pt-2">
         {#each navigationItems as item}
           <a
             href={item.href}
             class="{$page.url.pathname === item.href
               ? 'bg-neutral-900 text-white'
-              : 'text-gray-300 hover:bg-neutral-700 hover:text-white'} block rounded-md px-3 py-2 text-base font-medium"
+              : 'text-neutral-300 hover:bg-neutral-700 hover:text-white'} block rounded-md px-3 py-2 text-base font-medium"
             aria-current={$page.url.pathname === item.href ? 'page' : undefined}
           >
             {item.label}

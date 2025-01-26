@@ -1,13 +1,14 @@
 <script lang="ts">
-  import type { Database } from '$lib/supabase/types';
-  import { supabase } from '$lib/supabase/client';
-
+  import ScoreBoard from 'virtual:icons/tabler/scoreboard';
+  import CalendarStats from 'virtual:icons/tabler/calendar-stats';
+  import Trophy from 'virtual:icons/tabler/trophy';
   type Overlay = {
     id: string;
     name: string;
     description: string;
     url: string;
     previewUrl: string;
+    type: 'scoreboard' | 'calendar' | 'trophy';
   };
 
   const overlays: Overlay[] = [
@@ -16,26 +17,35 @@
       name: 'Match Overlay',
       description: 'Live match scores, player stats, and team information',
       url: '/overlays/match',
-      previewUrl: '/api/placeholder/400/225'
+      previewUrl: '/api/placeholder/400/225',
+      type: 'scoreboard'
     },
     {
       id: 'tournament',
       name: 'Match Schedule',
       description: 'Upcoming matches ticker for tournament schedule',
       url: '/overlays/tournament?component=ticker',
-      previewUrl: '/api/placeholder/400/225'
+      previewUrl: '/api/placeholder/400/225',
+      type: 'calendar'
     },
     {
       id: 'tournament',
       name: 'Division Standings',
       description: 'Current tournament standings by division',
       url: '/overlays/tournament?component=standings',
-      previewUrl: '/api/placeholder/400/225'
+      previewUrl: '/api/placeholder/400/225',
+      type: 'trophy'
     }
   ];
+
+  const iconMap = {
+    scoreboard: ScoreBoard,
+    calendar: CalendarStats,
+    trophy: Trophy
+  };
 </script>
 
-<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
+<div class="min-h-screen bg-white p-6 dark:bg-neutral-900">
   <div class="mx-auto max-w-7xl">
     <div class="md:flex md:items-center md:justify-between">
       <div class="min-w-0 flex-1">
@@ -53,17 +63,21 @@
           class="group relative rounded-lg bg-neutral-100 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-red-500 dark:bg-neutral-800"
         >
           <div>
-            <span
-              class="inline-flex rounded-lg bg-primary p-3 ring-4 ring-gray-800 dark:text-white"
-            >
-              <!-- Icon placeholder -->
+            <span class="inline-flex size-10 rounded-lg dark:text-white">
+              {#if iconMap[overlay.type]}
+                <svelte:component this={iconMap[overlay.type]} class="size-10" />
+              {:else}
+                <ScoreBoard class="size-10" /> <!-- Fallback icon -->
+              {/if}
             </span>
           </div>
-          <div class="mt-8">
+          <div class="mt-4">
             <h3 class="text-lg font-medium text-neutral-900 dark:text-white">
-              <a href={`/admin/overlays/${overlay.id}`} class="focus:outline-none">
+              <a
+                href={`/admin/overlays/${overlay.id}`}
+                class="font-bold uppercase focus:outline-none"
+              >
                 {overlay.name}
-                <span class="absolute inset-0" aria-hidden="true" />
               </a>
             </h3>
             <p class="mt-2 text-sm text-gray-400">
@@ -79,7 +93,7 @@
           </div>
           <div class="mt-4 flex space-x-2">
             <a
-              href={`/admin/overlays/${overlay.id}/settings`}
+              href={`/admin/overlays/${overlay.id}`}
               class="inline-flex items-center rounded-md bg-neutral-200 px-3 py-2 text-sm font-semibold text-neutral-900 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
             >
               Settings

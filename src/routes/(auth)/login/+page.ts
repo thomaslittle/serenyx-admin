@@ -4,8 +4,9 @@ import type { PageLoad } from './$types';
 export const load: PageLoad = async ({ parent }) => {
   const { session } = await parent();
 
-  // If the user is already logged in, redirect to home
+  // If user is already logged in, redirect them
   if (session) {
-    throw redirect(303, '/');
+    const role = session.user.app_metadata.role || 'authenticated';
+    throw redirect(303, role === 'admin' ? '/admin' : '/');
   }
 };

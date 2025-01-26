@@ -31,13 +31,15 @@
         <h4 class="mb-4 text-lg font-semibold dark:text-white">Admin</h4>
         <ul class="space-y-4">
           <li>
-            <a href="/admin" class="text-sm text-gray-400 hover:text-white">Dashboard</a>
+            <a href="/admin" class="text-sm text-neutral-400 hover:text-neutral-500">Dashboard</a>
           </li>
           <li>
-            <a href="/admin/overlays" class="text-sm text-gray-400 hover:text-white">Overlays</a>
+            <a href="/admin/overlays" class="text-sm text-neutral-400 hover:text-neutral-500"
+              >Overlays</a
+            >
           </li>
           <li>
-            <a href="/admin/teams" class="text-sm text-gray-400 hover:text-white">Teams</a>
+            <a href="/admin/teams" class="text-sm text-neutral-400 hover:text-neutral-500">Teams</a>
           </li>
         </ul>
       </div>
@@ -46,18 +48,22 @@
         <h4 class="mb-4 text-lg font-semibold dark:text-white">League</h4>
         <ul class="space-y-4">
           <li>
-            <a href="/my-team" class="text-sm text-gray-400 hover:text-white">My Team</a>
+            <a href="/my-team" class="text-sm text-neutral-400 hover:text-neutral-500">My Team</a>
           </li>
           <li>
-            <a href="/schedule" class="text-sm text-gray-400 hover:text-white">Schedule</a>
+            <a href="/schedule" class="text-sm text-neutral-400 hover:text-neutral-500">Schedule</a>
           </li>
           <li>
-            <a href="/divisions" class="text-sm text-gray-400 hover:text-white">Divisions</a>
+            <a href="/divisions" class="text-sm text-neutral-400 hover:text-neutral-500"
+              >Divisions</a
+            >
           </li>
         </ul>
       </div>
     </div>
 
-    <p class="mt-8 text-sm text-gray-400">© Serenyx League. All rights reserved.</p>
+    <p class="mt-8 text-sm text-gray-400">
+      © {new Date().getFullYear()} Serenyx League. All rights reserved.
+    </p>
   </div>
 </footer>

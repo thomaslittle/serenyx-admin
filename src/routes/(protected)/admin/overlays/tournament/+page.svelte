@@ -41,9 +41,13 @@
   }
 </script>
 
-<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
+<div class="min-h-screen bg-white p-6 dark:bg-neutral-900">
   <div class="mx-auto max-w-7xl">
-    <h2 class="font-heading mb-8 text-2xl font-bold text-white">Tournament Overlay Controls</h2>
+    <h2
+      class="font-heading mb-8 text-2xl font-bold uppercase text-neutral-900 dark:text-white sm:text-3xl"
+    >
+      Tournament Overlay Controls
+    </h2>
 
     <!-- Overlay Selection -->
     <div class="mb-8 rounded-lg bg-neutral-200 p-6 dark:bg-neutral-800">

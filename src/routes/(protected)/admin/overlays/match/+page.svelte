@@ -103,7 +103,7 @@
   }
 </script>
 
-<div class="min-h-screen bg-white p-8 dark:bg-neutral-900">
+<div class="min-h-screen bg-white p-6 dark:bg-neutral-900">
   <div class="mx-auto max-w-7xl">
     <h2 class="font-heading mb-8 text-2xl font-bold text-neutral-900 dark:text-white">
       Match Overlay Control

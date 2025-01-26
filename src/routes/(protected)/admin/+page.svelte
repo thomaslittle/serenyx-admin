@@ -17,20 +17,13 @@
   }
 </script>
 
-<div class="min-h-screen bg-white dark:bg-neutral-900">
+<div class="min-h-screen bg-white p-6 dark:bg-neutral-900">
   <!-- Navigation -->
-  <nav class="mx-auto max-w-7xl border-b border-neutral-200 px-0 py-4 dark:border-neutral-800">
-    <div class="mx-auto flex max-w-7xl items-center justify-between">
-      <div class="flex items-center gap-4">
-        <img
-          src="/images/logo.jpg"
-          alt="Serenyx Logo"
-          class="h-12 w-12 whitespace-normal rounded-full object-cover p-2"
-        />
-        <!-- <span class="leading-2 text-3xl font-bold uppercase text-white"
-					>Serenyx <span class="font-light">Broadcast</span></span
-				> -->
-      </div>
+  <nav class="mx-auto max-w-7xl py-4">
+    <div class="font-heading mx-auto flex max-w-7xl items-center justify-between">
+      <span class="leading-2 text-3xl font-black uppercase text-primary"
+        >Serenyx <span class="font-extralight text-white">Broadcast</span></span
+      >
     </div>
 
     <!-- Mobile menu -->
@@ -38,22 +31,22 @@
       <div class="space-y-1 px-2 pb-3 pt-2">
         <a
           href="/admin/overlays/match"
-          class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-neutral-700 hover:text-white"
+          class="block rounded-md px-3 py-2 text-base font-medium text-neutral-300 hover:bg-neutral-700 hover:text-white"
           >Match Overlay</a
         >
         <a
           href="/admin/overlays/teams"
-          class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-neutral-700 hover:text-white"
+          class="block rounded-md px-3 py-2 text-base font-medium text-neutral-300 hover:bg-neutral-700 hover:text-white"
           >Team Standings</a
         >
         <a
           href="/admin/planning/broadcast-script"
-          class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-neutral-700 hover:text-white"
+          class="block rounded-md px-3 py-2 text-base font-medium text-neutral-300 hover:bg-neutral-700 hover:text-white"
           >Broadcast Script</a
         >
         <button
           on:click={handleLogout}
-          class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-gray-300 hover:bg-neutral-700 hover:text-white"
+          class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-neutral-300 hover:bg-neutral-700 hover:text-white"
           >Logout</button
         >
       </div>
