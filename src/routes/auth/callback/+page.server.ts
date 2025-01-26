@@ -3,15 +3,15 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, locals: { supabase } }) => {
   const code = url.searchParams.get('code');
-  const next = url.searchParams.get('next') ?? '/';
+  const next = url.searchParams.get('next') || '/';
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      throw redirect(303, next);
+    if (error) {
+      console.error('Auth error:', error);
+      throw redirect(303, '/login?error=auth');
     }
   }
 
-  // Return to home page if code exchange fails
-  throw redirect(303, '/');
+  throw redirect(303, next);
 }; 
