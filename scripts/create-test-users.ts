@@ -1,18 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: join(__dirname, '..', '.env') });
 
 const supabase = createClient(
   process.env.PUBLIC_SUPABASE_URL || 'http://localhost:54321',
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
+const defaultPassword = process.env.TEST_USER_PASSWORD || 'changeme123';
+
 const testUsers = [
-  { email: 'league.commissioner@serenyx.com', password: 'test123', role: 'league_commissioner' },
-  { email: 'deputy.commissioner@serenyx.com', password: 'test123', role: 'deputy_commissioner' },
-  { email: 'secretary@serenyx.com', password: 'test123', role: 'secretary' },
-  { email: 'treasurer@serenyx.com', password: 'test123', role: 'treasurer' },
-  { email: 'match.commissioner@serenyx.com', password: 'test123', role: 'match_commissioner' },
-  { email: 'team.manager@serenyx.com', password: 'test123', role: 'team_manager' },
-  { email: 'player@serenyx.com', password: 'test123', role: 'player' }
+  { email: 'league.commissioner@serenyx.com', role: 'league_commissioner' },
+  { email: 'deputy.commissioner@serenyx.com', role: 'deputy_commissioner' },
+  { email: 'secretary@serenyx.com', role: 'secretary' },
+  { email: 'treasurer@serenyx.com', role: 'treasurer' },
+  { email: 'match.commissioner@serenyx.com', role: 'match_commissioner' },
+  { email: 'team.manager@serenyx.com', role: 'team_manager' },
+  { email: 'player@serenyx.com', role: 'player' }
 ];
 
 async function createTestUsers() {
@@ -21,7 +29,7 @@ async function createTestUsers() {
       // Create user
       const { data: userData, error: createError } = await supabase.auth.admin.createUser({
         email: user.email,
-        password: user.password,
+        password: defaultPassword,
         email_confirm: true
       });
 

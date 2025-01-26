@@ -10,3 +10,10 @@ node_modules
 .output
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Scripts with sensitive data
+scripts/create-test-users.ts
+scripts/create-admin.ts
+
+# Local development files
+*.local

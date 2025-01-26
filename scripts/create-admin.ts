@@ -13,7 +13,7 @@ const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Missing environment variables');
+  console.error('Missing required environment variables');
   process.exit(1);
 }
 
@@ -24,8 +24,13 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
-const adminEmail = 'admin@serenyx.com';
-const adminPassword = 'admin123';
+const adminEmail = process.env.ADMIN_EMAIL || 'admin@serenyx.com';
+const adminPassword = process.env.ADMIN_PASSWORD;
+
+if (!adminPassword) {
+  console.error('Missing ADMIN_PASSWORD environment variable');
+  process.exit(1);
+}
 
 async function createOrUpdateAdminUser() {
   try {
