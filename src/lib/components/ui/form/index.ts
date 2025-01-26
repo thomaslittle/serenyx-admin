@@ -8,11 +8,15 @@ import Fieldset from "./form-fieldset.svelte";
 import Legend from "./form-legend.svelte";
 import ElementField from "./form-element-field.svelte";
 
-const Control = FormPrimitive.Control as typeof FormPrimitive.Control;
+const Control = FormPrimitive.Control;
+const Root = FormPrimitive.Root;
+const Error = FormPrimitive.Error;
 
 export {
 	Field,
 	Control,
+	Root,
+	Error,
 	Label,
 	FieldErrors,
 	Description,
@@ -23,6 +27,8 @@ export {
 	//
 	Field as FormField,
 	Control as FormControl,
+	Root as FormRoot,
+	Error as FormError,
 	Description as FormDescription,
 	Label as FormLabel,
 	FieldErrors as FormFieldErrors,

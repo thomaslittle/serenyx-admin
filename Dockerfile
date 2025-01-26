@@ -6,11 +6,14 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies using npm install instead of npm ci
-RUN npm install --legacy-peer-deps
+# Install dependencies using npm ci for exact versions
+RUN npm ci
 
 # Copy source files
 COPY . .
+
+# Generate SvelteKit files before building
+RUN npx svelte-kit sync
 
 # Build the application
 RUN npm run build
