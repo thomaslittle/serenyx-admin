@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies using npm install instead of npm ci
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy source files
 COPY . .
