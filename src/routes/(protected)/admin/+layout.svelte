@@ -14,11 +14,11 @@
 
   const navigationItems = [
     { href: '/admin', label: 'Dashboard', icon: Home },
-    { href: '/admin/users', label: 'Users', icon: Users },
+    // { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/matches', label: 'Matches', icon: Home },
     { href: '/admin/teams', label: 'Teams', icon: Users },
-    { href: '/admin/overlays', label: 'Overlays', icon: Box },
-    { href: '/admin/sandbox', label: 'Sandbox', icon: Box }
+    { href: '/admin/overlays', label: 'Overlays', icon: Box }
+    // { href: '/admin/sandbox', label: 'Sandbox', icon: Box }
   ];
 
   async function handleSignOut() {

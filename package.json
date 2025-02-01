@@ -18,7 +18,8 @@
     "db:backup": "bash scripts/db-backup.sh",
     "db:restore": "bash scripts/db-restore.sh",
     "create-admin": "tsx scripts/create-admin.ts",
-    "create-test-user": "tsx scripts/create-test-users.ts"
+    "create-test-user": "tsx scripts/create-test-users.ts",
+    "configure-discord": "tsx scripts/configure-discord-auth.ts"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",

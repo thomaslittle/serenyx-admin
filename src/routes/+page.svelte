@@ -2,8 +2,41 @@
   import { auth, hasPermission } from '$lib/stores/auth';
   import { supabase } from '$lib/supabase/client';
   import Loader from '$lib/components/ui/loader.svelte';
+  import { onMount } from 'svelte';
 
   $: ({ user, role } = $auth);
+
+  let timeLeft = '00:00:00';
+  let countdownOver = false;
+
+  function updateCountdown() {
+    const now = new Date();
+    const target = new Date();
+    target.setHours(18, 15, 0, 0); // 6:15 PM
+
+    if (now > target) {
+      target.setDate(target.getDate() + 1);
+    }
+
+    const diff = target - now;
+    if (diff <= 0) {
+      countdownOver = true;
+      return;
+    }
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    const formattedHours = hours > 0 ? hours : '';
+    timeLeft = `${formattedHours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  onMount(() => {
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  });
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -12,9 +45,39 @@
 </script>
 
 <main>
-  <div class="flex min-h-screen items-center justify-center bg-neutral-900">
+  <div class="relative flex min-h-screen items-center justify-center bg-neutral-900">
+    <!-- Countdown Timer or Twitch Logo -->
+    <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+      {#if !countdownOver}
+        <div
+          class="xs:text-[8rem] z-0 select-none font-mono text-[6rem] font-bold tracking-tighter
+                 text-[#ea0e4b] opacity-10 blur-sm sm:text-[12rem] md:text-[15rem] lg:text-[20rem]"
+        >
+          {timeLeft}
+        </div>
+      {:else}
+        <a
+          href="https://www.twitch.tv/serenyxleague"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="pointer-events-auto z-0 opacity-10 transition-opacity hover:opacity-20"
+        >
+          <svg
+            class="h-64 w-64 sm:h-96 sm:w-96"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M4.262 1L2 4.5V19.5H6.5V23H10.5L14 19.5H18L22 15.5V1H4.262ZM20 14.5L18 16.5H14L10.5 20V16.5H6V3H20V14.5ZM16 7.5H14.5V12H16V7.5ZM11.5 7.5H10V12H11.5V7.5Z"
+            />
+          </svg>
+        </a>
+      {/if}
+    </div>
+
     {#if user}
-      <div class="mx-auto max-w-7xl">
+      <div class="relative z-10 mx-auto max-w-7xl">
         <div class="rounded-lg bg-neutral-800 p-8">
           <div class="flex items-center justify-between">
             <h1 class="text-3xl font-bold text-white">
@@ -108,7 +171,7 @@
         </div>
       </div>
     {:else}
-      <Loader width="100" height="100" class="text-white" />
+      <Loader width="100" height="100" className="text-white relative z-10" />
     {/if}
   </div>
 </main>

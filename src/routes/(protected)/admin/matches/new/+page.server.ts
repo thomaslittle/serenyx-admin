@@ -1,18 +1,41 @@
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad, Actions } from './$types';
-import { fail, redirect } from '@sveltejs/kit';
-import { supabase } from '$lib/supabase/client';
+import { fail, redirect, error } from '@sveltejs/kit';
 import { formSchema } from './schema';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+  const { session, user } = await locals.safeGetSession();
+  
+  if (!session?.access_token || !user) {
+    throw error(401, 'Unauthorized');
+  }
+
+  // Verify admin role
+  const metadataRole = user.app_metadata?.role;
+  let dbRole = null;
+  
+  if (!metadataRole) {
+    const { data: roleData } = await locals.supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+    dbRole = roleData?.role;
+  }
+
+  const isAdmin = metadataRole === 'admin' || dbRole === 'admin';
+  if (!isAdmin) {
+    throw error(403, 'Unauthorized');
+  }
+
   const form = await superValidate(zod(formSchema));
   console.log('Load form:', form);
   return { form };
 };
 
 export const actions: Actions = {
-  default: async ({ request }) => {
+  default: async ({ request, locals }) => {
     console.log('Form submission received');
     const form = await superValidate(request, zod(formSchema));
     console.log('Validated form:', form);
@@ -23,8 +46,32 @@ export const actions: Actions = {
     }
 
     try {
+      const { session, user } = await locals.safeGetSession();
+      
+      if (!session?.access_token || !user) {
+        return fail(401, { form, error: 'Unauthorized' });
+      }
+
+      // Verify admin role
+      const metadataRole = user.app_metadata?.role;
+      let dbRole = null;
+      
+      if (!metadataRole) {
+        const { data: roleData } = await locals.supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+        dbRole = roleData?.role;
+      }
+
+      const isAdmin = metadataRole === 'admin' || dbRole === 'admin';
+      if (!isAdmin) {
+        return fail(403, { form, error: 'Unauthorized' });
+      }
+
       console.log('Inserting match:', form.data);
-      const { data: matchData, error: createError } = await supabase
+      const { data: matchData, error: createError } = await locals.supabase
         .from('matches')
         .insert([{
           team1_id: form.data.team1_id,

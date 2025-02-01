@@ -7,7 +7,7 @@
   import { fetchDivisionStandings, subscribeToTournamentUpdates } from '$lib/stores/tournament';
 
   export let divisionName: string;
-  export let autoExpand = false;
+  export let autoExpand = true;
   export let autoExpandInterval = 0;
 
   let expanded = false;

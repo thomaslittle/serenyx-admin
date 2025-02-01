@@ -1,19 +1,48 @@
-.DS_Store
-node_modules
+# Build output
 /build
 /.svelte-kit
 /package
-.env
-.env.*
-!.env.example
-.vercel
 .output
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Scripts with sensitive data
+# Dependencies
+node_modules
+
+# Environment files
+.env
+.env.*
+!.env.example
+*.local
+
+# Sensitive scripts
 scripts/create-test-users.ts
 scripts/create-admin.ts
+scripts/configure-discord-auth.sh
+scripts/check-auth-config.sh
 
-# Local development files
-*.local
+# Database files
+/supabase/backups/*.dump
+/supabase/backups/*.sql
+
+# IDE and OS files
+.DS_Store
+.vercel
+.idea
+.vscode
+*.swp
+*~
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
