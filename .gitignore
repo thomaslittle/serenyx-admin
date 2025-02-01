@@ -46,3 +46,6 @@ pids
 *.pid
 *.seed
 *.pid.lock
+
+# Ignore specific file
+static/assets/OBS-Serenyx.zip
