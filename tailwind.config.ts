@@ -67,8 +67,7 @@ const config: Config = {
 				sm: "calc(var(--radius) - 4px)"
 			},
 			fontFamily: {
-				sans: ['Red Hat Display', ...fontFamily.sans],
-				heading: ['DM Sans', ...fontFamily.sans]
+				sans: [...fontFamily.sans]
 			},
 			keyframes: {
 				"accordion-down": {

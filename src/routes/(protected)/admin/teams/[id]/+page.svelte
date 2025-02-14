@@ -6,6 +6,9 @@
   import type { Database } from '$lib/supabase/types';
   import ImageUpload from '$lib/components/ImageUpload.svelte';
   import { auth, canDeleteItems } from '$lib/stores/auth';
+  import { Input } from '$lib/components/ui/input/index.js';
+  import { Label } from '$lib/components/ui/label/index.js';
+  import { Button } from '$lib/components/ui/button/index.js';
 
   type Team = Database['public']['Tables']['teams']['Row'];
 
@@ -13,7 +16,7 @@
   let error: string | null = null;
   let loading = true;
   let saving = false;
-  let { role } = $auth;
+  const { role } = $auth as { role?: string };
 
   onMount(async () => {
     await fetchTeam();
@@ -100,11 +103,11 @@
   }
 </script>
 
-<div class="min-h-screen bg-white p-6 dark:bg-neutral-900">
+<div class="min-h-screen bg-background p-6">
   <div class="mx-auto max-w-3xl">
     <div class="md:flex md:items-center md:justify-between">
       <div class="min-w-0 flex-1">
-        <h2 class="font-heading text-2xl font-bold text-white sm:text-3xl">
+        <h2 class="font-heading text-2xl font-bold sm:text-3xl">
           {#if loading}
             Loading...
           {:else if team}
@@ -115,59 +118,39 @@
         </h2>
       </div>
       <div class="mt-4 flex space-x-3 md:ml-4 md:mt-0">
-        <a
-          href="/admin/teams"
-          class="inline-flex items-center rounded-md bg-neutral-600 px-3 py-2 text-sm font-semibold text-white hover:bg-neutral-500"
-        >
-          Cancel
+        <a href="/admin/teams">
+          <Button variant="outline">Cancel</Button>
         </a>
         {#if canDeleteItems(role)}
-          <button
-            type="button"
-            on:click={deleteTeam}
-            disabled={saving}
-            class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
-          >
+          <Button variant="destructive" on:click={() => deleteTeam()} disabled={saving}>
             Delete Team
-          </button>
+          </Button>
         {/if}
       </div>
     </div>
 
     {#if error}
-      <div class="mt-4 rounded-md bg-red-500 p-4">
-        <p class="text-sm capitalize leading-none text-neutral-900 dark:text-white">{error}</p>
+      <div class="mt-4 rounded-md bg-destructive p-4">
+        <p class="text-sm capitalize leading-none text-destructive-foreground">{error}</p>
       </div>
     {/if}
 
     {#if loading}
-      <div class="mt-8 text-white">Loading team information...</div>
+      <div class="mt-8">Loading team information...</div>
     {:else if team}
       <form on:submit|preventDefault={updateTeam} class="mt-8 space-y-6">
-        <div>
-          <label for="name" class="block text-sm font-medium text-white">Team Name</label>
-          <input
-            type="text"
-            id="name"
-            bind:value={team.name}
-            required
-            class="mt-1 block w-full rounded-md border-gray-600 bg-neutral-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-          />
+        <div class="grid w-full gap-1.5">
+          <Label for="name">Team Name</Label>
+          <Input type="text" id="name" bind:value={team.name} required />
         </div>
 
-        <div>
-          <label for="division" class="block text-sm font-medium text-white">Division</label>
-          <input
-            type="text"
-            id="division"
-            bind:value={team.division}
-            required
-            class="mt-1 block w-full rounded-md border-gray-600 bg-neutral-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-          />
+        <div class="grid w-full gap-1.5">
+          <Label for="division">Division</Label>
+          <Input type="text" id="division" bind:value={team.division} required />
         </div>
 
-        <div>
-          <label class="mb-4 block text-sm font-medium text-white">Team Logo</label>
+        <div class="grid w-full gap-1.5">
+          <Label>Team Logo</Label>
           <div class="mt-1">
             <ImageUpload
               currentImageUrl={team.logo_url}
@@ -178,58 +161,36 @@
         </div>
 
         <div class="grid grid-cols-3 gap-4">
-          <div>
-            <label for="wins" class="block text-sm font-medium text-white">Wins</label>
-            <input
-              type="number"
-              id="wins"
-              bind:value={team.wins}
-              min="0"
-              class="mt-1 block w-full rounded-md border-gray-600 bg-neutral-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-            />
+          <div class="grid w-full gap-1.5">
+            <Label for="wins">Wins</Label>
+            <Input type="number" id="wins" bind:value={team.wins} min="0" />
           </div>
 
-          <div>
-            <label for="losses" class="block text-sm font-medium text-white">Losses</label>
-            <input
-              type="number"
-              id="losses"
-              bind:value={team.losses}
-              min="0"
-              class="mt-1 block w-full rounded-md border-gray-600 bg-neutral-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-            />
+          <div class="grid w-full gap-1.5">
+            <Label for="losses">Losses</Label>
+            <Input type="number" id="losses" bind:value={team.losses} min="0" />
           </div>
 
-          <div>
-            <label for="points" class="block text-sm font-medium text-white">Points</label>
-            <input
-              type="number"
-              id="points"
-              bind:value={team.points}
-              min="0"
-              class="mt-1 block w-full rounded-md border-gray-600 bg-neutral-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-            />
+          <div class="grid w-full gap-1.5">
+            <Label for="points">Points</Label>
+            <Input type="number" id="points" bind:value={team.points} min="0" />
           </div>
         </div>
 
         <div class="flex justify-end space-x-4">
           {#if canDeleteItems(role)}
-            <button type="button" on:click={deleteTeam} class="bg-red-600 px-4 py-2 text-white">
+            <Button type="button" variant="destructive" on:click={() => deleteTeam()}>
               Delete Team
-            </button>
+            </Button>
           {/if}
 
-          <button
-            type="submit"
-            disabled={saving || !canDeleteItems(role)}
-            class="bg-primary px-4 py-2 text-white disabled:opacity-50"
-          >
+          <Button type="submit" disabled={saving || !canDeleteItems(role)} variant="default">
             {saving ? 'Saving...' : 'Save Changes'}
-          </button>
+          </Button>
         </div>
       </form>
     {:else}
-      <div class="mt-8 text-white">Team not found.</div>
+      <div class="mt-8">Team not found.</div>
     {/if}
   </div>
 </div>

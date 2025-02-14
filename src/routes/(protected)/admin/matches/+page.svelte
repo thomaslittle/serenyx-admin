@@ -16,14 +16,9 @@
   let loading = true;
   let error: string | null = null;
 
-  if (data?.session?.user?.role !== 'admin') {
-    throw redirect(303, '/');
-  }
-
   onMount(async () => {
     // Revalidate session before fetch
     await supabase.auth.refreshSession();
-    console.log('Refreshed session:', supabase.auth.getSession());
 
     await fetchMatches();
   });

@@ -1,16 +1,34 @@
-import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
+/// <reference types="svelte-clerk/env" />
 
 declare global {
   namespace App {
     // interface Error {}
     interface Locals {
-      supabase: SupabaseClient;
-      safeGetSession: () => Promise<{ session: Session | null; user: User | null }>;
-      session: Session | null;
-      user: User | null;
+      auth: {
+        userId: string | null;
+        sessionId: string | null;
+        session?: any;
+        user?: {
+          id: string;
+          username?: string;
+          firstName?: string;
+          lastName?: string;
+          primaryEmailAddress?: string;
+          emailAddresses?: string[];
+          publicMetadata?: {
+            role?: string;
+            [key: string]: any;
+          };
+          [key: string]: any;
+        } | null;
+        actor?: any;
+        organization?: any;
+      };
     }
     interface PageData {
-      session: Session | null;
+      userId?: string;
+      user?: Locals["auth"]["user"];
+      isAdmin?: boolean;
       cookies?: Record<string, string>;
     }
     // interface PageState {}

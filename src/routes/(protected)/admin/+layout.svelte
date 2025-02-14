@@ -9,16 +9,43 @@
   import Users from 'lucide-svelte/icons/users';
   import Box from 'lucide-svelte/icons/box';
   import Settings from 'lucide-svelte/icons/settings';
+  import SidebarNav from '$lib/components/admin/sidebar/sidebar-nav.svelte';
+  import { BarChart } from 'lucide-svelte';
+  import { Menu } from 'lucide-svelte';
 
   let isMenuOpen = false;
+  let isSidebarOpen = false;
 
   const navigationItems = [
     { href: '/admin', label: 'Dashboard', icon: Home },
+    { href: '/admin/overlays', label: 'Overlays', icon: Box },
     // { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/matches', label: 'Matches', icon: Home },
-    { href: '/admin/teams', label: 'Teams', icon: Users },
-    { href: '/admin/overlays', label: 'Overlays', icon: Box }
+    { href: '/admin/teams', label: 'Teams', icon: Users }
     // { href: '/admin/sandbox', label: 'Sandbox', icon: Box }
+  ];
+
+  const sidebarNavItems = [
+    {
+      title: 'Overview',
+      href: '/admin',
+      icon: Home
+    },
+    {
+      title: 'Analytics',
+      href: '/admin/analytics',
+      icon: BarChart
+    },
+    {
+      title: 'Users',
+      href: '/admin/users',
+      icon: Users
+    },
+    {
+      title: 'Settings',
+      href: '/admin/settings',
+      icon: Settings
+    }
   ];
 
   async function handleSignOut() {
@@ -32,6 +59,10 @@
 
   function toggleTheme() {
     $theme = $theme === 'dark' ? 'light' : 'dark';
+  }
+
+  function toggleSidebar() {
+    isSidebarOpen = !isSidebarOpen;
   }
 
   onMount(() => {
@@ -49,6 +80,7 @@
   >
     <div class="mx-auto max-w-7xl">
       <div class="flex h-16 items-center justify-between">
+        <!-- svelte-ignore a11y_consider_explicit_label -->
         <a href="/">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -245,8 +277,27 @@
     </div>
   </nav>
 
-  <main>
-    <slot />
-  </main>
+  <div class="">
+    <!-- Mobile sidebar toggle -->
+    <button
+      class="fixed bottom-4 right-4 z-40 rounded-full bg-primary p-3 text-white shadow-lg md:hidden"
+      onclick={toggleSidebar}
+      aria-label="Toggle sidebar"
+    >
+      <Menu size={24} />
+    </button>
+
+    <!-- <aside
+      class="fixed top-14 z-30 -ml-2 h-[calc(100vh-3.5rem)] w-full shrink-0 overflow-y-auto border-r bg-white dark:bg-neutral-900 md:sticky md:block
+      {isSidebarOpen ? 'block' : 'hidden md:block'}"
+    >
+      <div class="py-6 pr-6 lg:py-8">
+        <SidebarNav items={sidebarNavItems} />
+      </div>
+    </aside> -->
+    <main class="flex w-full flex-col overflow-hidden">
+      <slot />
+    </main>
+  </div>
   <Footer />
 </div>

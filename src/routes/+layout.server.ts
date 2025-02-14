@@ -1,9 +1,18 @@
-import type { LayoutServerLoad } from './$types';
+import type { LayoutServerLoad } from "./$types";
 
-export const load: LayoutServerLoad = async ({ locals: { safeGetSession }, cookies }) => {
-  const { session } = await safeGetSession();
+export const load: LayoutServerLoad = async ({ locals, url }) => {
+  const { userId, user } = locals.auth;
+
+  // Skip auth check for protected routes
+  if (url.pathname.startsWith("/admin")) {
+    return {
+      userId,
+      user,
+    };
+  }
+
   return {
-    session,
-    cookies: cookies.getAll()
+    userId,
+    user,
   };
 };

@@ -7,33 +7,43 @@
     name: string;
     description: string;
     url: string;
-    previewUrl: string;
     type: 'scoreboard' | 'calendar' | 'trophy';
   };
 
   const overlays: Overlay[] = [
     {
+      id: 'timer',
+      name: 'timer',
+      description: 'Contdown timer/stream starting screen',
+      url: '',
+      type: 'scoreboard'
+    },
+    {
+      id: 'desk',
+      name: 'desk',
+      description: 'Caster Booth',
+      url: '',
+      type: 'scoreboard'
+    },
+    {
       id: 'match',
       name: 'Match Overlay',
       description: 'Live match scores, player stats, and team information',
-      url: '/overlays/match',
-      previewUrl: '/api/placeholder/400/225',
+      url: '',
       type: 'scoreboard'
     },
     {
       id: 'tournament',
       name: 'Match Schedule',
       description: 'Upcoming matches ticker for tournament schedule',
-      url: '/overlays/tournament?component=ticker',
-      previewUrl: '/api/placeholder/400/225',
+      url: '',
       type: 'calendar'
     },
     {
       id: 'tournament',
       name: 'Division Standings',
       description: 'Current tournament standings by division',
-      url: '/overlays/tournament?component=standings',
-      previewUrl: '/api/placeholder/400/225',
+      url: '',
       type: 'trophy'
     }
   ];
@@ -98,14 +108,14 @@
             >
               Settings
             </a>
-            <a
+            <!-- <a
               href={`${overlay.url}/preview`}
               class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white"
               target="_blank"
               rel="noopener noreferrer"
             >
               Preview
-            </a>
+            </a> -->
           </div>
         </div>
       {/each}
@@ -113,7 +123,7 @@
 
     <!-- Quickstart Guide -->
     <div class="mt-12 rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
-      <h2 class="font-heading mb-4 text-2xl font-black uppercase text-primary">Quickstart Guide</h2>
+      <h2 class="mb-4 font-heading text-2xl font-black uppercase text-primary">Quickstart Guide</h2>
       <div class="prose prose-invert max-w-none">
         <ol class="space-y-4 text-neutral-900 dark:text-white">
           <li>

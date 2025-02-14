@@ -90,8 +90,8 @@
   }
 </script>
 
-<div class="container mx-auto p-4">
-  <h1 class="mb-6 text-2xl font-bold">Create New Match</h1>
+<div class="container max-w-7xl p-4">
+  <h1 class="mb-6 text-2xl font-bold uppercase">Create New Match</h1>
 
   <form method="POST" use:formEnhance class="max-w-2xl space-y-6">
     {#if error}

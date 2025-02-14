@@ -63,15 +63,14 @@
           Teams
         </h2>
       </div>
+
       <div class="mt-4 flex md:ml-4 md:mt-0">
-        {#if canDeleteItems(role)}
-          <a
-            href="/admin/teams/new"
-            class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white"
-          >
-            Add Team
-          </a>
-        {/if}
+        <a
+          href="/admin/teams/new"
+          class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white"
+        >
+          Add Team
+        </a>
       </div>
     </div>
 

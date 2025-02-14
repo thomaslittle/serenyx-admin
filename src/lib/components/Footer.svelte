@@ -48,22 +48,20 @@
         <h4 class="mb-4 text-lg font-semibold dark:text-white">League</h4>
         <ul class="space-y-4">
           <li>
-            <a href="/my-team" class="text-sm text-neutral-400 hover:text-neutral-500">My Team</a>
+            <a href="#" class="text-sm text-neutral-400 hover:text-neutral-500">My Team</a>
           </li>
           <li>
-            <a href="/schedule" class="text-sm text-neutral-400 hover:text-neutral-500">Schedule</a>
+            <a href="#" class="text-sm text-neutral-400 hover:text-neutral-500">Schedule</a>
           </li>
           <li>
-            <a href="/divisions" class="text-sm text-neutral-400 hover:text-neutral-500"
-              >Divisions</a
-            >
+            <a href="#" class="text-sm text-neutral-400 hover:text-neutral-500">Divisions</a>
           </li>
         </ul>
       </div>
     </div>
 
     <p class="mt-8 text-sm text-gray-400">
-      © {new Date().getFullYear()} Serenyx League. All rights reserved.
+      © {new Date().getFullYear()} Serenyx League
     </p>
   </div>
 </footer>

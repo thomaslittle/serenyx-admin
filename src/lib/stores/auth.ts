@@ -1,39 +1,55 @@
-import { writable } from 'svelte/store';
-import type { User } from '@supabase/supabase-js';
+import { writable } from "svelte/store";
 
 interface AuthStore {
-  user: User | null;
-  role: string | null;
+  userId: string | null;
+  isAdmin: boolean;
+  userData: {
+    email?: string;
+    username?: string;
+    firstName?: string;
+    lastName?: string;
+    imageUrl?: string;
+    publicMetadata?: {
+      role?: string;
+      [key: string]: any;
+    };
+  } | null;
 }
 
-export const auth = writable<AuthStore>({
-  user: null,
-  role: null
-});
-
-export const canAccessAdmin = (role: string | null) => {
-  return role === 'admin';
+const initialState: AuthStore = {
+  userId: null,
+  isAdmin: false,
+  userData: null,
 };
 
-export const canManageUsers = (role: string | null) => {
-  return role === 'admin';
+export const auth = writable<AuthStore>(initialState);
+
+export const canAccessAdmin = (user: any) => {
+  return user?.publicMetadata?.role === "admin";
 };
 
-export const canManageTeams = (role: string | null) => {
-  return role === 'admin';
+export const canManageUsers = (user: any) => {
+  return user?.publicMetadata?.role === "admin";
 };
 
-export const canDeleteItems = (role: string | null) => {
-  return role === 'admin';
+export const canManageTeams = (user: any) => {
+  return user?.publicMetadata?.role === "admin";
 };
 
-export const hasPermission = (role: string | null, permission: string) => {
+export const canDeleteItems = (user: any) => {
+  return user?.publicMetadata?.role === "admin";
+};
+
+export const hasPermission = (user: any, permission: string) => {
+  if (!user) return false;
+
+  const role = user.publicMetadata?.role;
   if (!role) return false;
-  
+
   // Define permission mappings
   const rolePermissions: Record<string, string[]> = {
-    admin: ['channels.delete', 'messages.delete'],
-    moderator: ['messages.delete']
+    admin: ["channels.delete", "messages.delete"],
+    moderator: ["messages.delete"],
   };
 
   return rolePermissions[role]?.includes(permission) || false;
