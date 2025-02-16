@@ -126,6 +126,24 @@
       >
         <iconify-icon icon="tabler:brand-x" height="26" class="hover:text-[#e90e4b]"></iconify-icon>
       </a>
+      <a
+        href="https://www.instagram.com/serenyx_league/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Instagram"
+      >
+        <iconify-icon icon="tabler:brand-instagram" height="26" class="hover:text-[#e90e4b]"
+        ></iconify-icon>
+      </a>
+      <a
+        href="https://www.youtube.com/@SerenyxLeague"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="YouTube"
+      >
+        <iconify-icon icon="tabler:brand-youtube" height="26" class="hover:text-[#e90e4b]"
+        ></iconify-icon>
+      </a>
     </div>
 
     <div

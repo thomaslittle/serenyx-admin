@@ -12,6 +12,12 @@ RUN npm install --legacy-peer-deps
 # Copy source files
 COPY . .
 
+# Copy fonts
+COPY src/lib/assets/fonts src/lib/assets/fonts
+
+# Copy static fonts
+COPY static/fonts static/fonts
+
 # Generate SvelteKit files before building
 RUN npx svelte-kit sync
 

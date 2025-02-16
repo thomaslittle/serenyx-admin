@@ -8,31 +8,10 @@
   @font-face {
     font-family: 'MADE TOMMY';
     src:
-      url('fonts/MADETOMMY-Medium.woff2') format('woff2'),
-      url('fonts/MADETOMMY-Medium.woff') format('woff');
-    font-weight: 500;
+      url('fonts/MADETOMMY.woff2') format('woff2'),
+      url('fonts/MADETOMMY.woff') format('woff');
+    font-weight: normal;
     font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'MADE TOMMY';
-    src:
-      url('fonts/MADETOMMY-ExtraBold.woff2') format('woff2'),
-      url('fonts/MADETOMMY-ExtraBold.woff') format('woff');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'MADE TOMMY';
-    src:
-      url('fonts/MADETOMMY-Thin.woff2') format('woff2'),
-      url('fonts/MADETOMMY-Thin.woff') format('woff');
-    font-weight: 100;
-    font-style: normal;
-    font-display: swap;
   }
 
   @font-face {
@@ -42,37 +21,51 @@
       url('fonts/MADETOMMY-Bold.woff') format('woff');
     font-weight: bold;
     font-style: normal;
-    font-display: swap;
   }
 
   @font-face {
     font-family: 'MADE TOMMY';
     src:
-      url('fonts/MADETOMMY-Light.woff2') format('woff2'),
-      url('fonts/MADETOMMY-Light.woff') format('woff');
+      url('fonts/MADETOMMY-Medium.woff2') format('woff2'),
+      url('fonts/MADETOMMY-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'MADE TOMMY';
+    src:
+      url('http://cdn.serenyxleague.com/u//MADETOMMY-ExtraBold.woff2') format('woff2'),
+      url('fonts/MADETOMMY-ExtraBold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'MADE TOMMY';
+    src:
+      url('http://cdn.serenyxleague.com/u//MADETOMMY-Thin.woff2') format('woff2'),
+      url('http://cdn.serenyxleague.com/u//MADETOMMY-Thin.woff') format('woff');
+    font-weight: 100;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'MADE TOMMY';
+    src:
+      url('http://cdn.serenyxleague.com/u//MADETOMMY-Light.woff2') format('woff2'),
+      url('http://cdn.serenyxleague.com/u//MADETOMMY-Light.woff') format('woff');
     font-weight: 300;
     font-style: normal;
-    font-display: swap;
   }
 
   @font-face {
     font-family: 'MADE TOMMY';
     src:
-      url('fonts/MADETOMMY-Black.woff2') format('woff2'),
-      url('fonts/MADETOMMY-Black.woff') format('woff');
+      url('http://cdn.serenyxleague.com/u//MADETOMMY-Black.woff2') format('woff2'),
+      url('http://cdn.serenyxleague.com/u//MADETOMMY-Black.woff') format('woff');
     font-weight: 900;
     font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'MADE TOMMY';
-    src:
-      url('fonts/MADETOMMY.woff2') format('woff2'),
-      url('fonts/MADETOMMY.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
   }
 
   :root {
