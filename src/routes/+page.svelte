@@ -28,9 +28,9 @@
 
     // Array to track all fetch promises
     const fetchPromises = [
-      // Left tournament
+      // 2v2 tournament (now left)
       fetch(
-        '/api/standings?slug=tournament/serenyx-league-2025-1v1-hub/event/serenyx-league-100-1v1-gauntlet-2'
+        '/api/standings?slug=tournament/serenyx-league-2025-2v2-hub/event/serenyx-league-200-2v2-blitz-1'
       )
         .then((response) => {
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -41,9 +41,9 @@
           leftTournamentTitle = data.tournamentName;
         }),
 
-      // Right tournament
+      // 1v1 tournament (now right)
       fetch(
-        '/api/standings?slug=tournament/serenyx-league-2025-2v2-hub/event/serenyx-league-200-2v2-blitz-1'
+        '/api/standings?slug=tournament/serenyx-league-2025-1v1-hub/event/serenyx-league-100-1v1-gauntlet-2'
       )
         .then((response) => {
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
