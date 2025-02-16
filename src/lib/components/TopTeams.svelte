@@ -97,19 +97,21 @@
   {#if totalPages > 1}
     <div class="mt-4 flex items-center justify-between">
       <button
-        on:click={() => handlePageChange('left')}
+        onclick={() => handlePageChange('left')}
         disabled={currentPage === 1}
         class="pt-2 text-[#e90e4b] disabled:opacity-50"
+        aria-label="Previous page"
       >
-        <iconify-icon icon="teenyicons:double-caret-left-small-outline" width="24" />
+        <iconify-icon icon="teenyicons:double-caret-left-small-outline" width="24"></iconify-icon>
       </button>
       <span class="text-sm text-gray-700">{currentPage}/{totalPages}</span>
       <button
-        on:click={() => handlePageChange('right')}
+        onclick={() => handlePageChange('right')}
         disabled={currentPage === totalPages}
         class="pt-2 text-[#e90e4b] disabled:opacity-50"
+        aria-label="Next page"
       >
-        <iconify-icon icon="teenyicons:double-caret-right-small-outline" width="24" />
+        <iconify-icon icon="teenyicons:double-caret-right-small-outline" width="24"></iconify-icon>
       </button>
     </div>
   {/if}

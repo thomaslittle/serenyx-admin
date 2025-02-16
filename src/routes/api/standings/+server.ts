@@ -1,4 +1,4 @@
-import { STARTGG_API_KEY } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import type { RequestHandler } from "./$types";
 
 function extractEventIdFromSlug(slug: string): string {
@@ -21,7 +21,7 @@ export const GET: RequestHandler = async ({ url }) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${STARTGG_API_KEY}`,
+        "Authorization": `Bearer ${env.STARTGG_API_KEY}`,
       },
       body: JSON.stringify({
         query: `
@@ -56,7 +56,7 @@ export const GET: RequestHandler = async ({ url }) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${STARTGG_API_KEY}`,
+        "Authorization": `Bearer ${env.STARTGG_API_KEY}`,
       },
       body: JSON.stringify({
         query: `
@@ -93,10 +93,10 @@ export const GET: RequestHandler = async ({ url }) => {
       );
     }
 
-    const standings = data.event.standings.nodes.map((node) => ({
+    const standings = data.event.standings.nodes.map((node: any) => ({
       placement: node.placement,
       name: node.entrant.name,
-      participants: node.entrant.participants.map((participant) => ({
+      participants: node.entrant.participants.map((participant: any) => ({
         gamerTag: participant.gamerTag,
       })),
     }));
