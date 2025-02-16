@@ -67,6 +67,7 @@
   "dependencies": {
     "@clerk/clerk-js": "^5.52.1",
     "@clerk/clerk-sdk-node": "^5.1.6",
+    "@iconify/svelte": "^4.2.0",
     "@supabase/auth-helpers-sveltekit": "^0.13.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.39.8",
@@ -75,6 +76,7 @@
     "@types/node": "^22.10.10",
     "bits-ui": "^1.0.0-next.86",
     "embla-carousel-autoplay": "^8.5.2",
+    "iconify-icon": "^2.3.0",
     "jwt-decode": "^4.0.0",
     "lucide-svelte": "^0.474.0",
     "marked": "^15.0.6",

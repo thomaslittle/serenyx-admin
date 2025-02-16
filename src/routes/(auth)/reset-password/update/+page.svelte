@@ -80,7 +80,19 @@
       </div>
 
       {#if error}
-        <div class="rounded-md bg-red-500 p-4">
+        <div class="mt-4 flex items-center gap-2 rounded-md border border-primary/40 p-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            class="stroke-primary"
+            ><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              ><path d="M20 16v2m0 4.01l.01-.011M4 6v6s0 3 7 3s7-3 7-3V6" /><path
+                d="M11 3c7 0 7 3 7 3s0 3-7 3s-7-3-7-3s0-3 7-3m0 18c-7 0-7-3-7-3v-6"
+              /></g
+            ></svg
+          >
           <p class="text-sm capitalize leading-none text-neutral-900 dark:text-white">{error}</p>
         </div>
       {/if}
