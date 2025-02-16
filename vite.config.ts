@@ -15,7 +15,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/fonts": {
-        target: "http://cdn.serenyxleague.com",
+        target: "https://cdn.serenyxleague.com",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/fonts/, "/u"),
       },
