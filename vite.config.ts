@@ -1,15 +1,24 @@
-import { sveltekit } from '@sveltejs/kit/vite';
-import Icons from 'unplugin-icons/vite';
-import { defineConfig } from 'vite';
+import { sveltekit } from "@sveltejs/kit/vite";
+import Icons from "unplugin-icons/vite";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
     sveltekit(),
     Icons({
-      compiler: 'svelte'
-    })
+      compiler: "svelte",
+    }),
   ],
   test: {
-    include: ['src/**/*.{test,spec}.{js,ts}']
-  }
+    include: ["src/**/*.{test,spec}.{js,ts}"],
+  },
+  server: {
+    proxy: {
+      "/fonts": {
+        target: "http://cdn.serenyxleague.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/fonts/, "/u"),
+      },
+    },
+  },
 });

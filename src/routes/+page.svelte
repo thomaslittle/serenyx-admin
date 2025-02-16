@@ -144,6 +144,15 @@
         <iconify-icon icon="tabler:brand-youtube" height="26" class="hover:text-[#e90e4b]"
         ></iconify-icon>
       </a>
+      <a
+        href="https://www.tiktok.com/@serenyx.league"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="TikTok"
+      >
+        <iconify-icon icon="tabler:brand-tiktok" height="26" class="hover:text-[#e90e4b]"
+        ></iconify-icon>
+      </a>
     </div>
 
     <div

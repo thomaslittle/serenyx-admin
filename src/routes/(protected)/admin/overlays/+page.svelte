@@ -1,7 +1,4 @@
 <script lang="ts">
-  import ScoreBoard from 'virtual:icons/tabler/scoreboard';
-  import CalendarStats from 'virtual:icons/tabler/calendar-stats';
-  import Trophy from 'virtual:icons/tabler/trophy';
   type Overlay = {
     id: string;
     name: string;
@@ -123,7 +120,7 @@
 
     <!-- Quickstart Guide -->
     <div class="mt-12 rounded-lg bg-neutral-100 p-6 dark:bg-neutral-800">
-      <h2 class="mb-4 font-heading text-2xl font-black uppercase text-primary">Quickstart Guide</h2>
+      <h2 class="font-heading mb-4 text-2xl font-black uppercase text-primary">Quickstart Guide</h2>
       <div class="prose prose-invert max-w-none">
         <ol class="space-y-4 text-neutral-900 dark:text-white">
           <li>
