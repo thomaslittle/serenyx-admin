@@ -45,11 +45,11 @@
     }
   ];
 
-  const iconMap = {
-    scoreboard: ScoreBoard,
-    calendar: CalendarStats,
-    trophy: Trophy
-  };
+  // const iconMap = {
+  //   scoreboard: ScoreBoard,
+  //   calendar: CalendarStats,
+  //   trophy: Trophy
+  // };
 </script>
 
 <div class="min-h-screen bg-white p-6 dark:bg-neutral-900">
@@ -69,15 +69,6 @@
         <div
           class="group relative rounded-lg bg-neutral-100 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-red-500 dark:bg-neutral-800"
         >
-          <div>
-            <span class="inline-flex size-10 rounded-lg dark:text-white">
-              {#if iconMap[overlay.type]}
-                <svelte:component this={iconMap[overlay.type]} class="size-10" />
-              {:else}
-                <ScoreBoard class="size-10" /> <!-- Fallback icon -->
-              {/if}
-            </span>
-          </div>
           <div class="mt-4">
             <h3 class="text-lg font-medium text-neutral-900 dark:text-white">
               <a

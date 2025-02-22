@@ -5,7 +5,7 @@
   import DivisionStandings from '$lib/components/overlays/tournament/DivisionStandings.svelte';
   import type { DivisionStanding } from '$lib/types/tournament';
   import { divisions } from '$lib/stores/tournament';
-  import { fetchDivisionStandings } from '$lib/stores/tournament';
+  // import { fetchDivisionStandings } from '$lib/stores/tournament';
 
   // Get URL parameters
   $: component = $page.url.searchParams.get('component') || 'ticker';
@@ -14,7 +14,7 @@
   $: selectedDivisions = ($page.url.searchParams.get('divisions') || '').split(',').filter(Boolean);
 
   onMount(async () => {
-    await fetchDivisionStandings();
+    // await fetchDivisionStandings();
   });
 </script>
 

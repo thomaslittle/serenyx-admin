@@ -17,7 +17,7 @@
   let rightTeams = $state([]);
   let leftTournamentTitle = $state('Loading...');
   let rightTournamentTitle = $state('Loading...');
-
+  let someData = $state({});
   let showLeft = $state(false);
   let showRight = $state(false);
 
@@ -39,6 +39,7 @@
         .then((data) => {
           leftTeams = data.standings;
           leftTournamentTitle = data.tournamentName;
+          someData = data;
         }),
 
       // 1v1 tournament (now right)
@@ -196,3 +197,5 @@
     </div>
   </div>
 </main>
+
+<!-- <ScoreBoard data={someData} /> -->
