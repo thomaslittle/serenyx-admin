@@ -16,6 +16,7 @@ COPY . .
 RUN npx svelte-kit sync
 
 # Build the application
+ENV NODE_ENV=production
 RUN npm run build
 
 # Production stage

@@ -21,4 +21,14 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      external: [
+        "@supabase/supabase-js",
+      ],
+    },
+  },
+  ssr: {
+    noExternal: ["@supabase/supabase-js"],
+  },
 });

@@ -28,6 +28,13 @@ interface StartGGEvent {
   };
 }
 
+interface StandingNode {
+  placement: number;
+  entrant: {
+    name: string;
+  };
+}
+
 export const GET: RequestHandler = async () => {
   try {
     const eventSlug =
@@ -107,7 +114,7 @@ export const GET: RequestHandler = async () => {
       })
       .filter(Boolean);
 
-    const standings = event.standings.nodes.map((node) => ({
+    const standings = event.standings.nodes.map((node: StandingNode) => ({
       placement: node.placement,
       team: node.entrant.name,
       // For now, we'll use placement as a proxy for score
