@@ -108,12 +108,8 @@
 </script>
 
 <main class="relative">
-  <div
-    class="relative flex min-h-screen items-center justify-center bg-white"
-    style="min-height: calc(100vh)"
-  >
-    <!-- Fullscreen video -->
-
+  <div class="relative min-h-screen bg-white" style="min-height: calc(100vh)">
+    <!-- Video background -->
     <video
       autoplay
       muted
@@ -125,9 +121,8 @@
       Your browser does not support the video tag.
     </video>
 
-    <div
-      class="text-shadow-sm absolute right-0 top-0 z-10 mx-auto flex items-center justify-center gap-3 p-4 drop-shadow-md"
-    >
+    <!-- Social icons stay absolute -->
+    <div class="text-shadow-sm absolute right-0 top-0 z-50 mx-auto flex items-center justify-center gap-3 p-4 drop-shadow-md">
       <a
         href="https://www.twitch.tv/serenyxleague"
         target="_blank"
@@ -183,73 +178,73 @@
       </a>
     </div>
 
-    <div
-      class="absolute bottom-0 left-0 right-0 z-0 mx-auto flex items-center justify-center gap-3 border-[#e90e4b] bg-[#e8e4dc]/50 py-2 backdrop-blur-sm"
-    >
-      <img src="/images/logos-new.png" alt="Serenyx League" />
+    <!-- Main content grid -->
+    <div class="relative z-10 grid min-h-screen grid-rows-[auto_1fr_auto] py-32">
+      <!-- Winners section -->
+      {#if !loading && !error && winner.teamName}
+        <div 
+          class="text-center mb-8"
+          transition:fly={{ y: -20, duration: 300 }}
+        >
+          <h1 class="lg:text-7xl font-bold mb-2 text-[#e90e4b] drop-shadow-lg">
+            CONGRATS {winner.teamName}
+          </h1>
+          <p class="text-xl text-[#e90e4b] drop-shadow-lg">
+            {winner.players.map(p => p.name).join(' • ')}
+          </p>
+          <p class="text-lg mt-2 text-black/80 drop-shadow-lg">
+            Winners of {middleTournamentTitle}
+          </p>
+        </div>
+      {/if}
+
+      <!-- Tournaments grid -->
+      <div class="grid grid-cols-1 gap-8 p-4 md:grid-cols-[320px_320px_320px] xl:grid-cols-[320px_320px_320px] place-content-center place-items-center">
+        <!-- Left Tournament (2v2) -->
+        <div class="w-full max-w-[320px] flex h-full min-h-[400px] items-center justify-center md:mt-0">
+          {#if loading}
+            <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+          {:else if error}
+            <div class="p-4 text-red-500">{error}</div>
+          {:else if showLeft}
+            <div transition:fly={{ y: -20, duration: 300 }}>
+              <TopTeams teams={leftTeams} tournamentTitle={leftTournamentTitle} />
+            </div>
+          {/if}
+        </div>
+
+        <!-- Middle Tournament (3v3) -->
+        <div class="w-full max-w-[320px] flex h-full min-h-[400px] items-center justify-center">
+          {#if loading}
+            <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+          {:else if error}
+            <div class="p-4 text-red-500">{error}</div>
+          {:else if showMiddle}
+            <div transition:fly={{ y: -20, duration: 300, delay: 150 }}>
+              <TopTeams teams={middleTeams} tournamentTitle={middleTournamentTitle} />
+            </div>
+          {/if}
+        </div>
+
+        <!-- Right Tournament (1v1) -->
+        <div class="w-full max-w-[320px] flex h-full min-h-[400px] items-center justify-center md:mb-0">
+          {#if loading}
+            <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+          {:else if error}
+            <div class="p-4 text-red-500">{error}</div>
+          {:else if showRight}
+            <div transition:fly={{ y: -20, duration: 300, delay: 150 }}>
+              <TopTeams teams={rightTeams} tournamentTitle={rightTournamentTitle} />
+            </div>
+          {/if}
+        </div>
+      </div>
+
+      <!-- Sponsor logos -->
+      <div class="mx-auto w-full flex items-center justify-center gap-3 border-[#e90e4b] bg-[#e8e4dc]/50 py-2 backdrop-blur-sm">
+        <img src="/images/logos-new.png" alt="Serenyx League" />
+      </div>
     </div>
-
-    <!-- Top Teams Component -->
-    <div
-      class="grid grid-cols-1 gap-4 p-4 md:grid-cols-[320px_320px_320px] xl:grid-cols-[320px_320px_320px]"
-    >
-      <!-- Left Tournament (2v2) -->
-      <div class="mt-8 flex h-full min-h-[400px] items-center justify-center md:mt-0">
-        {#if loading}
-          <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
-        {:else if error}
-          <div class="p-4 text-red-500">{error}</div>
-        {:else if showLeft}
-          <div transition:fly={{ y: -20, duration: 300 }}>
-            <TopTeams teams={leftTeams} tournamentTitle={leftTournamentTitle} />
-          </div>
-        {/if}
-      </div>
-
-      <!-- Middle Tournament (3v3) -->
-      <div class="flex h-full min-h-[400px] items-center justify-center">
-        {#if loading}
-          <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
-        {:else if error}
-          <div class="p-4 text-red-500">{error}</div>
-        {:else if showMiddle}
-          <div transition:fly={{ y: -20, duration: 300, delay: 150 }}>
-            <TopTeams teams={middleTeams} tournamentTitle={middleTournamentTitle} />
-          </div>
-        {/if}
-      </div>
-
-      <!-- Right Tournament (1v1) -->
-      <div class="mb-32 flex h-full min-h-[400px] items-center justify-center md:mb-0">
-        {#if loading}
-          <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
-        {:else if error}
-          <div class="p-4 text-red-500">{error}</div>
-        {:else if showRight}
-          <div transition:fly={{ y: -20, duration: 300, delay: 150 }}>
-            <TopTeams teams={rightTeams} tournamentTitle={rightTournamentTitle} />
-          </div>
-        {/if}
-      </div>
-    </div>
-
-    <!-- Add this right before the Top Teams Component div -->
-    {#if !loading && !error && winner.teamName}
-      <div 
-        class="absolute top-24 z-10 text-center w-full"
-        transition:fly={{ y: -20, duration: 300 }}
-      >
-        <h1 class="text-4xl font-bold my-8 text-[#e90e4b] drop-shadow-lg">
-          CONGRATS {winner.teamName}
-        </h1>
-        <p class="text-xl text-[#e90e4b] drop-shadow-lg">
-          {winner.players.map(p => p.name).join(' • ')}
-        </p>
-        <p class="text-lg mt-2 text-black/80 drop-shadow-lg">
-          Winners of {middleTournamentTitle}
-        </p>
-      </div>
-    {/if}
   </div>
 </main>
 
