@@ -15,11 +15,15 @@
   let error = $state<string | null>(null);
   let leftTeams = $state([]);
   let rightTeams = $state([]);
+  let middleTeams = $state([]);
   let leftTournamentTitle = $state('Loading...');
   let rightTournamentTitle = $state('Loading...');
+  let middleTournamentTitle = $state('Loading...');
   let someData = $state({});
   let showLeft = $state(false);
   let showRight = $state(false);
+  let showMiddle = $state(false);
+  let winner = $state({ teamName: '', players: [] });
 
   // Fetch both tournaments
   $effect(() => {
@@ -40,6 +44,26 @@
           leftTeams = data.standings;
           leftTournamentTitle = data.tournamentName;
           someData = data;
+        }),
+
+      // 3v3 tournament (middle)
+      fetch(
+        '/api/standings?slug=tournament/serenyx-league-2025-3v3-hub/event/serenyx-league-360-3v3-meltdown-1'
+      )
+        .then((response) => {
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          return response.json();
+        })
+        .then((data) => {
+          middleTeams = data.standings;
+          middleTournamentTitle = data.tournamentName;
+          // Get winner info from first place team
+          if (data.standings?.[0]) {
+            winner = {
+              teamName: data.standings[0].name,
+              players: data.standings[0].players || []
+            };
+          }
         }),
 
       // 1v1 tournament (now right)
@@ -73,7 +97,10 @@
       setTimeout(() => {
         showLeft = true;
         setTimeout(() => {
-          showRight = true;
+          showMiddle = true;
+          setTimeout(() => {
+            showRight = true;
+          }, 150);
         }, 150);
       }, 100);
     }
@@ -159,12 +186,12 @@
     <div
       class="absolute bottom-0 left-0 right-0 z-0 mx-auto flex items-center justify-center gap-3 border-[#e90e4b] bg-[#e8e4dc]/50 py-2 backdrop-blur-sm"
     >
-      <img src="/images/sponsor-logos.png" alt="Serenyx League" />
+      <img src="/images/logos-new.png" alt="Serenyx League" />
     </div>
 
     <!-- Top Teams Component -->
     <div
-      class="grid grid-cols-1 gap-4 p-4 md:grid-cols-[320px_80px_320px] xl:grid-cols-[320px_600px_320px]"
+      class="grid grid-cols-1 gap-4 p-4 md:grid-cols-[320px_320px_320px] xl:grid-cols-[320px_320px_320px]"
     >
       <!-- Left Tournament (2v2) -->
       <div class="mt-8 flex h-full min-h-[400px] items-center justify-center md:mt-0">
@@ -179,8 +206,18 @@
         {/if}
       </div>
 
-      <!-- Empty column for desktop spacing -->
-      <div class="hidden md:block"></div>
+      <!-- Middle Tournament (3v3) -->
+      <div class="flex h-full min-h-[400px] items-center justify-center">
+        {#if loading}
+          <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+        {:else if error}
+          <div class="p-4 text-red-500">{error}</div>
+        {:else if showMiddle}
+          <div transition:fly={{ y: -20, duration: 300, delay: 150 }}>
+            <TopTeams teams={middleTeams} tournamentTitle={middleTournamentTitle} />
+          </div>
+        {/if}
+      </div>
 
       <!-- Right Tournament (1v1) -->
       <div class="mb-32 flex h-full min-h-[400px] items-center justify-center md:mb-0">
@@ -195,6 +232,24 @@
         {/if}
       </div>
     </div>
+
+    <!-- Add this right before the Top Teams Component div -->
+    {#if !loading && !error && winner.teamName}
+      <div 
+        class="absolute top-24 z-10 text-center w-full"
+        transition:fly={{ y: -20, duration: 300 }}
+      >
+        <h1 class="text-4xl font-bold my-8 text-[#e90e4b] drop-shadow-lg">
+          CONGRATS {winner.teamName}
+        </h1>
+        <p class="text-xl text-[#e90e4b] drop-shadow-lg">
+          {winner.players.map(p => p.name).join(' • ')}
+        </p>
+        <p class="text-lg mt-2 text-black/80 drop-shadow-lg">
+          Winners of {middleTournamentTitle}
+        </p>
+      </div>
+    {/if}
   </div>
 </main>
 
