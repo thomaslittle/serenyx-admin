@@ -122,7 +122,7 @@
     </video>
 
     <!-- Social icons stay absolute -->
-    <div class="text-shadow-sm absolute right-0 top-0 z-50 mx-auto flex items-center justify-center gap-3 p-4 drop-shadow-md">
+    <div class="text-white lg:text-black text-shadow-sm absolute right-0 top-0 z-50 mx-auto flex items-center justify-center gap-3 p-4 drop-shadow-md">
       <a
         href="https://www.twitch.tv/serenyxleague"
         target="_blank"
@@ -183,10 +183,10 @@
       <!-- Winners section -->
       {#if !loading && !error && winner.teamName}
         <div 
-          class="text-center mb-8"
+          class="text-center mb-8 mx-4 bg-[#e8e4dc]/90 py-4 lg:bg-transparent"
           transition:fly={{ y: -20, duration: 300 }}
         >
-          <h1 class="lg:text-7xl font-bold mb-2 text-[#e90e4b] drop-shadow-lg">
+          <h1 class="lg:text-7xl md:text-5xl text-4xl font-bold mb-2 text-[#e90e4b] drop-shadow-lg">
             CONGRATS {winner.teamName}
           </h1>
           <p class="text-xl text-[#e90e4b] drop-shadow-lg">
@@ -199,9 +199,9 @@
       {/if}
 
       <!-- Tournaments grid -->
-      <div class="grid grid-cols-1 gap-8 p-4 md:grid-cols-[320px_320px_320px] xl:grid-cols-[320px_320px_320px] place-content-center place-items-center">
+      <div class="grid grid-cols-1 gap-8 p-4 place-content-center place-items-center lg:grid-cols-3">
         <!-- Left Tournament (2v2) -->
-        <div class="w-full max-w-[320px] flex h-full min-h-[400px] items-center justify-center md:mt-0">
+        <div class="w-full max-w-[320px] flex h-full min-h-[400px] items-center justify-center">
           {#if loading}
             <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
           {:else if error}
@@ -227,7 +227,7 @@
         </div>
 
         <!-- Right Tournament (1v1) -->
-        <div class="w-full max-w-[320px] flex h-full min-h-[400px] items-center justify-center md:mb-0">
+        <div class="w-full max-w-[320px] flex h-full min-h-[400px] items-center justify-center">
           {#if loading}
             <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
           {:else if error}
