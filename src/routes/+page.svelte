@@ -48,7 +48,7 @@
 
       // 3v3 tournament (middle)
       fetch(
-        '/api/standings?slug=tournament/serenyx-league-2025-3v3-hub/event/serenyx-league-360-3v3-meltdown-1'
+        '/api/standings?slug=tournament/serenyx-league-na-120-3v3-meltdown-2/event/weekly-120-3v3-meltdown-2'
       )
         .then((response) => {
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);

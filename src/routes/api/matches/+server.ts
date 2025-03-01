@@ -38,7 +38,7 @@ interface StandingNode {
 export const GET: RequestHandler = async () => {
   try {
     const eventSlug =
-      "tournament/serenyx-league-2025-3v3-hub/event/serenyx-league-300-3v3-meltdown-1";
+      "tournament/serenyx-league-na-120-3v3-meltdown-2/event/weekly-120-3v3-meltdown-2";
     const response = await fetch("https://api.start.gg/gql/alpha", {
       method: "POST",
       headers: {
